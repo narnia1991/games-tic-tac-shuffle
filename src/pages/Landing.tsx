@@ -1,8 +1,16 @@
 import styled from "@emotion/styled";
-import { FC, MouseEvent, SyntheticEvent, useState } from "react";
-import { bgColor, textPrimary } from "../colors";
+import {
+  FC,
+  MouseEvent,
+  SyntheticEvent,
+  useCallback,
+  useEffect,
+  useState,
+} from "react";
+import { bgColor, textPrimary } from "../variables";
 import Checkbox from "../components/Checkbox";
-import FilledButton from "../components/FilledButton";
+import Button from "../components/Button";
+import StartGameModal from "../modal/StartGameModal";
 
 const Container = styled.div`
   height: 100vh;
@@ -28,7 +36,7 @@ const ModeContainer = styled(Container)`
 /* TODO: 
     X Start game button
     X Mode selector
-    Start game modal
+    X Start game modal
     Leaderboards
 */
 
@@ -36,34 +44,41 @@ const Landing: FC = () => {
   const [mode, setMode] = useState("PVP");
   const [isStartModalOpen, setIsStartModalOpen] = useState(false);
 
-  const handleModeClick = (e: MouseEvent) => {
-    if (e.target) {
-      setMode((e.target as HTMLInputElement).value);
-    }
+  const handleModeClick = (param: string) => {
+    setMode(param);
   };
 
   const handleStartClick = (e: MouseEvent) => {
     e.preventDefault();
-    // open start modal
+    setIsStartModalOpen(true);
   };
+
+  const closeStartModal = useCallback(() => {
+    setIsStartModalOpen(false);
+  }, []);
 
   return (
     <Container>
+      <StartGameModal
+        isOpen={isStartModalOpen}
+        onClose={closeStartModal}
+        isTwoPlayer={mode === "PVP"}
+      />
       <StartContainer>
-        <FilledButton width="100%" onClick={handleStartClick}>
+        <Button variant="filled" width="100%" onClick={handleStartClick}>
           START GAME
-        </FilledButton>
+        </Button>
         <ModeContainer>
           <Checkbox
             label="VS Player"
-            onClick={handleModeClick}
+            onClick={() => handleModeClick("PVP")}
             name="mode"
             value="PVP"
             checked={mode === "PVP"}
           ></Checkbox>
           <Checkbox
             label="VS Computer"
-            onClick={handleModeClick}
+            onClick={() => handleModeClick("VSAI")}
             name="mode"
             value="VSAI"
             checked={mode === "VSAI"}

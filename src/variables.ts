@@ -4,3 +4,5 @@ export const secondary = "#ff7f50";
 export const error = "#ff4444";
 export const textPrimary = "#ffffff";
 export const textSecondary = "#003232";
+
+export const fallBackFont = "monospace";

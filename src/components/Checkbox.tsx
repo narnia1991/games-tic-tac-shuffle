@@ -69,7 +69,6 @@ const Checkbox: FC<Props> = ({
   value,
   ...props
 }) => {
-  console.log(checked);
   return (
     <CContainer onClick={onClick}>
       {label}
