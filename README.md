@@ -23,13 +23,13 @@ two-player game but allow an option to compete with a bot.
 
 ## Screens
 
-- Main Screen
-- - Start Game
-- - History
+- - Main Screen
+- - Game Screen
 
 ### Good to have:
 
+- - Undo Button
 - - Difficulty settings
 - - History of each match
 - - Timer
-- - Different location realtime
+- - Different device players realtime
