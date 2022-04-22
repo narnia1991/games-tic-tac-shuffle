@@ -1,8 +1,11 @@
 import styled from "@emotion/styled";
 import { FC } from "react";
+import FilledButton from "../components/FilledButton";
 
 const Container = styled.div`
   display: flex;
+  align-items: center;
+  justify-content: center;
 `;
 
 /* TODO: 
@@ -13,7 +16,11 @@ const Container = styled.div`
 */
 
 const Landing: FC = () => {
-  return <Container></Container>;
+  return (
+    <Container>
+      <FilledButton width="10rem">START GAME</FilledButton>
+    </Container>
+  );
 };
 
 export default Landing;
