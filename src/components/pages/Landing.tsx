@@ -1,24 +1,10 @@
 import styled from "@emotion/styled";
-import {
-  FC,
-  MouseEvent,
-  SyntheticEvent,
-  useCallback,
-  useEffect,
-  useState,
-} from "react";
-import { bgColor, textPrimary } from "../variables";
-import Checkbox from "../components/Checkbox";
-import Button from "../components/Button";
+import { FC, MouseEvent, useCallback, useState } from "react";
+import { textPrimary } from "../../variables";
+import Checkbox from "../common/Checkbox";
+import Button from "../common/Button";
 import StartGameModal from "../modal/StartGameModal";
-
-const Container = styled.div`
-  height: 100vh;
-  width: 100vw;
-  display: flex;
-  justify-content: center;
-  background-color: ${bgColor};
-`;
+import { Container } from "../styled/Container";
 
 const StartContainer = styled(Container)`
   flex-direction: column;

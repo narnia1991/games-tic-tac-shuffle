@@ -1,10 +1,9 @@
 import styled from "@emotion/styled";
-import { FC, ReactNode, useCallback } from "react";
-import ReactModal from "react-modal";
-import { fallBackFont, textPrimary } from "../variables";
-import Button from "../components/Button";
-import Input from "../components/Input";
-import Modal from "../components/Modal";
+import { FC, useCallback } from "react";
+import { fallBackFont, textPrimary } from "../../variables";
+import Button from "../common/Button";
+import Input from "../common/Input";
+import Modal from "../common/Modal";
 
 const Container = styled.div`
   display: flex;
@@ -58,7 +57,7 @@ const StartGameModal: FC<Props> = ({ isOpen, onClose, isTwoPlayer }) => {
       ? "Computer"
       : (player2 as HTMLInputElement)!.value;
 
-    window.location.href = `${window.location.hostname}/${p1Name}_${p2Name}`;
+    window.location.href = `/${p1Name}_${p2Name}`;
     onClose();
   }, []);
 

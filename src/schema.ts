@@ -25,6 +25,4 @@ export type Game = {
   p2Name: string;
   matchTurns: Array<Match>;
   score: Score;
-  date: string;
-  gameWinner: string;
 };

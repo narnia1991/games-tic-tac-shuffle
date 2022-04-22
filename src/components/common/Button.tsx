@@ -1,6 +1,6 @@
 import { FC, MouseEventHandler, ReactNode } from "react";
 import styled from "@emotion/styled";
-import { primary, textPrimary, textSecondary } from "../variables";
+import { primary, textPrimary } from "../../variables";
 
 const StyledButton = styled.button`
   padding: 1rem;

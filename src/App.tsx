@@ -1,5 +1,5 @@
-import Game from "./pages/Game";
-import Landing from "./pages/Landing";
+import Game from "./components/pages/Game";
+import Landing from "./components/pages/Landing";
 
 const App = () => {
   const pathname = window.location.pathname;
