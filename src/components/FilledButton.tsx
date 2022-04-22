@@ -1,10 +1,10 @@
-import { FC, ReactNode } from "react";
+import { FC, MouseEventHandler, ReactNode } from "react";
 import styled from "@emotion/styled";
-import { primary, secondary, textPrimary } from "../colors";
+import { primary, textPrimary } from "../colors";
 
 type Props = {
   width?: string;
-  onClick?(): void;
+  onClick?: MouseEventHandler;
   children: ReactNode;
 };
 
@@ -14,6 +14,7 @@ const Button = styled.button`
   color: ${textPrimary};
   width: ${(props: Props) => props.width};
   cursor: pointer;
+  font-weight: bold;
   &:hover {
     background-color: ${primary}99;
   }
