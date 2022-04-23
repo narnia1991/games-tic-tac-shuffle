@@ -57,13 +57,14 @@ const StartGameModal: FC<Props> = ({ isOpen, onClose, isTwoPlayer }) => {
 
     const p1Name = player1.value;
 
-    if (player2?.value) {
+    if (!!player2?.value) {
       const p2Name = player2.value;
       window.location.href = `/${p1Name}_${p2Name}`;
+      onClose();
+      return;
     }
 
     window.location.href = `/${p1Name}`;
-
     onClose();
   }, []);
 
