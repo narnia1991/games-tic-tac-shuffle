@@ -1,36 +1,16 @@
-import styled from "@emotion/styled";
-import { FC, useState } from "react";
+import { Dispatch, FC, useEffect } from "react";
 import Button from "../common/Button";
 import { Container } from "../styled/Container";
-import { textPrimary } from "../../variables";
 import Board from "./Board";
-
-const Banner = styled(Container)`
-  width: 90vw;
-  height: 10rem;
-  justify-content: space-between;
-`;
-
-const Wrapper = styled(Container)`
-  height: inherit;
-  flex-direction: column;
-  justify-content: space-between;
-`;
-
-const PlayerContainer = styled(Container)`
-  height: inherit;
-  flex-direction: column;
-`;
-
-const ButtonWrapper = styled.div`
-  display: flex;
-  padding: 3rem;
-  justify-content: center;
-`;
-const TextDisplay = styled.span`
-  color: ${textPrimary};
-  font-size: 3rem;
-`;
+import {
+  Banner,
+  ButtonWrapper,
+  PlayerContainer,
+  TextDisplay,
+  Wrapper,
+} from "../styled/StyledGame";
+import { useGame } from "../provider/GameProvider";
+import { GameAction, GameState } from "../types/types";
 
 /*
   TODO:
@@ -42,55 +22,48 @@ const TextDisplay = styled.span`
   Match Results Modal
 */
 
-export type PlayerScore = {
-  name: string;
-  score: number;
-};
+export const getNames = (dispatch: Dispatch<GameAction>) => {
+  const p1Name = window.location.pathname.split("/").pop()?.split("_")[0] || "";
+  const p2Name = window.location.pathname.split("/").pop()?.split("_")[1] || "";
 
-const p1Name = window.location.pathname.split("/").pop()?.split("_")[0] || "";
-const p2Name = window.location.pathname.split("/").pop()?.split("_")[1] || "";
-
-export const DEFAULT_GAME_MATCH = {
-  p1: {
-    name: p1Name,
-    score: 0,
-  },
-  p2: {
-    name: p2Name,
-    score: 0,
-  },
+  dispatch({
+    type: "SET_PLAYER_NAMES",
+    payload: {
+      p1: p1Name,
+      p2: p2Name,
+    },
+  });
 };
 
 const Game: FC = () => {
-  const [gameMatch, setGameMatch] = useState(DEFAULT_GAME_MATCH);
-  const [matchTurns, setMatchTurns] = useState([]);
-  const [currentPlayer, setCurrentPlayer] = useState(p1Name);
+  const [state, dispatch] = useGame();
+  const { gameMatch, currentPlayer } = state as GameState;
+  const { p1, p2 } = gameMatch;
+
+  useEffect(() => {
+    getNames(dispatch as Dispatch<GameAction>);
+  }, []);
 
   return (
     <Container>
       <Wrapper>
         <Banner>
           <PlayerContainer>
-            <TextDisplay>{p1Name}</TextDisplay>
-            <TextDisplay>Score: {gameMatch.p1.score}</TextDisplay>
+            <TextDisplay>{p1.name}</TextDisplay>
+            <TextDisplay>Score: {p1.score}</TextDisplay>
           </PlayerContainer>
 
           <PlayerContainer>
-            <TextDisplay>{currentPlayer}'s Turn</TextDisplay>
+            <TextDisplay>{gameMatch[currentPlayer].name}'s Turn</TextDisplay>
           </PlayerContainer>
 
           <PlayerContainer>
-            <TextDisplay>{p2Name}</TextDisplay>
-            <TextDisplay>Score: {gameMatch.p2.score}</TextDisplay>
+            <TextDisplay>{p2.name}</TextDisplay>
+            <TextDisplay>Score: {p2.score}</TextDisplay>
           </PlayerContainer>
         </Banner>
 
-        <Board
-          currentPlayer={currentPlayer}
-          gameMatch={gameMatch}
-          setGameMatch={setGameMatch}
-          setCurrentPlayer={setCurrentPlayer}
-        />
+        {p1.name && <Board />}
 
         <ButtonWrapper>
           <Button variant="filled">End Game</Button>

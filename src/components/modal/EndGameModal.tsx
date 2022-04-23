@@ -3,7 +3,8 @@ import { FC, useEffect, useState } from "react";
 import { fallBackFont, textPrimary } from "../../variables";
 import Button from "../common/Button";
 import Modal from "../common/Modal";
-import { PlayerScore } from "../pages/Game";
+import { useGame } from "../provider/GameProvider";
+import { GameState, PlayerScore } from "../types/types";
 
 const Container = styled.div`
   display: flex;
@@ -29,30 +30,34 @@ type Props = {
   gameMatch: Record<string, PlayerScore>;
 };
 
-const EndGameModal: FC<Props> = ({ isOpen, onClose, gameMatch }) => {
+const EndGameModal: FC<Props> = ({ isOpen, onClose }) => {
   const [header, setHeader] = useState("");
+  const [state] = useGame();
+  const { p1, p2 } = (state as GameState).gameMatch;
 
   const handleCloseModal = () => {
     onClose();
-    //remove localstorage entries
   };
 
   const handleSaveGame = () => {
     // create DB entry here
-    //remove localstorage entries
     onClose();
   };
 
   useEffect(() => {
-    console.log(gameMatch);
-    const { p1, p2 } = gameMatch;
-    let headerText =
-      Number(p1.score) > Number(p2.score)
-        ? `${p1.name} Wins!`
-        : `${p2.name} Wins!`;
-
-    if (Number(p1.score) === Number(p2.score)) {
-      headerText = "Draw!";
+    let headerText = "";
+    switch (true) {
+      case p1.score > p2.score:
+        headerText = `${p1.name} Wins!`;
+        break;
+      case p1.score < p2.score:
+        headerText = `${p2.name} Wins!`;
+        break;
+      case p1.score === p2.score:
+        headerText = "Draw!";
+        break;
+      default:
+        return;
     }
 
     setHeader(headerText);
@@ -66,10 +71,10 @@ const EndGameModal: FC<Props> = ({ isOpen, onClose, gameMatch }) => {
     >
       <Label>{header}</Label>
       <Label>
-        {gameMatch.p1.name}: {gameMatch.p1.score}
+        {p1.name}: {p1.score}
       </Label>
       <Label>
-        {gameMatch.p2.name}: {gameMatch.p2.score}
+        {p2.name}: {p2.score}
       </Label>
       <ButtonContainer>
         <Button variant="text" onClick={handleCloseModal}>

@@ -30,13 +30,7 @@ type Props = {
   onProceed(): void;
 };
 
-const EndMatchModal: FC<Props> = ({
-  isOpen,
-  onClose,
-  gameMatch,
-  header,
-  onProceed,
-}) => {
+const EndMatchModal: FC<Props> = ({ isOpen, onClose, header, onProceed }) => {
   const handleCloseModal = () => {
     onClose();
   };
