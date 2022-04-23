@@ -1,10 +1,14 @@
 import styled from "@emotion/styled";
 import { FC, useEffect, useState } from "react";
+import { addDoc, collection, getDocs } from "firebase/firestore";
+
 import { fallBackFont, textPrimary } from "../../variables";
 import Button from "../common/Button";
 import Modal from "../common/Modal";
 import { useGame } from "../provider/GameProvider";
 import { GameState, PlayerScore } from "../types/types";
+import { db } from "../../firebase";
+import { format } from "date-fns";
 
 const Container = styled.div`
   display: flex;
@@ -31,6 +35,8 @@ type Props = {
 };
 
 const EndGameModal: FC<Props> = ({ isOpen, onClose }) => {
+  const gameCollectionRef = collection(db, "tictactoe");
+
   const [header, setHeader] = useState("");
   const [state] = useGame();
   const { p1, p2 } = (state as GameState).gameMatch;
@@ -39,9 +45,33 @@ const EndGameModal: FC<Props> = ({ isOpen, onClose }) => {
     onClose();
   };
 
-  const handleSaveGame = () => {
-    // create DB entry here
-    onClose();
+  const handleSaveGame = async () => {
+    try {
+      let winner = "";
+      switch (true) {
+        case p1.score > p2.score:
+          winner = p1.name;
+          break;
+        case p1.score < p2.score:
+          winner = p2.name;
+          break;
+        case p1.score === p2.score:
+          winner = "Draw";
+          break;
+        default:
+          return;
+      }
+
+      await addDoc(gameCollectionRef, {
+        date: format(new Date(), "yyyy-MM-dd hh:mm:ss"),
+        name: `${p1.name} vs. ${p2.name}`,
+        score: `${p1.score} - ${p2.score}`,
+        winner,
+      });
+      onClose();
+    } catch (err) {
+      //noop
+    }
   };
 
   useEffect(() => {
@@ -70,9 +100,13 @@ const EndGameModal: FC<Props> = ({ isOpen, onClose }) => {
       shouldCloseOnOverlayClick={false}
     >
       <Label>{header}</Label>
+      <br />
+      <br />
       <Label>
         {p1.name}: {p1.score}
       </Label>
+      <br />
+
       <Label>
         {p2.name}: {p2.score}
       </Label>

@@ -1,12 +1,17 @@
 import styled from "@emotion/styled";
-import { FC, MouseEvent, useCallback, useState } from "react";
-import { textPrimary } from "../../variables";
+import { FC, MouseEvent, useCallback, useEffect, useState } from "react";
+import { bgColor, textPrimary } from "../../variables";
 import Checkbox from "../common/Checkbox";
 import Button from "../common/Button";
 import StartGameModal from "../modal/StartGameModal";
 import { Container } from "../styled/Container";
+import Game from "./Game";
+import { collection, getDocs, orderBy, query } from "firebase/firestore";
+import { db } from "../../firebase";
+import { dataToGameList } from "../helpers/parse";
 
 const StartContainer = styled(Container)`
+  height: auto;
   flex-direction: column;
   margin-top: 5rem;
   width: 30vw;
@@ -15,19 +20,42 @@ const StartContainer = styled(Container)`
 const ModeContainer = styled(Container)`
   margin: 1rem 0;
   width: 95%;
+  height: auto;
   justify-content: space-between;
   color: ${textPrimary};
 `;
 
-/* TODO: 
-    X Start game button
-    X Mode selector
-    X Start game modal
-    Leaderboards
-*/
+const History = styled(Container)`
+  height: 60vh;
+  flex-direction: column;
+  justify-content: flex-start;
+  overflow-x: hidden;
+  overflow-y: auto;
+  margin-top: 3rem;
+`;
+
+const GameEntry = styled.div`
+  background-color: ${textPrimary};
+  display: flex;
+  justify-content: space-between;
+  padding: 0.5rem;
+  border-bottom: 3px solid ${bgColor};
+  color: ${bgColor};
+  font-weight: bold;
+`;
+
+const Entry = styled.div`
+  flex: 1;
+  display: flex;
+  text-align: left;
+  padding: 1rem;
+`;
 
 const Landing: FC = () => {
-  const [mode, setMode] = useState("PVP");
+  const gameCollectionRef = collection(db, "tictactoe");
+
+  const [mode, setMode] = useState("");
+  const [gameList, setGameList] = useState<any>([]);
   const [isStartModalOpen, setIsStartModalOpen] = useState(false);
 
   const handleModeClick = (param: string) => {
@@ -41,6 +69,22 @@ const Landing: FC = () => {
 
   const closeStartModal = useCallback(() => {
     setIsStartModalOpen(false);
+  }, []);
+
+  useEffect(() => {
+    setMode("PVP");
+    const loadGames = async () => {
+      const data = await getDocs(
+        query(gameCollectionRef, orderBy("date", "desc"))
+      );
+      setGameList(
+        data.docs.map((entry) =>
+          dataToGameList(entry.data(), entry.id)
+        ) as Array<any>
+      );
+    };
+
+    loadGames();
   }, []);
 
   return (
@@ -70,6 +114,27 @@ const Landing: FC = () => {
             checked={mode === "VSAI"}
           ></Checkbox>
         </ModeContainer>
+
+        <History>
+          <GameEntry>
+            <Entry>Match</Entry>
+            <Entry>Score</Entry>
+            <Entry>Winner</Entry>
+            <Entry>Date</Entry>
+          </GameEntry>
+          {gameList.length ? (
+            gameList.map((entry: any) => (
+              <GameEntry key={`${entry.name}_${entry.date}`}>
+                <Entry>{entry.name}</Entry>
+                <Entry>{entry.score}</Entry>
+                <Entry>{entry.winner}</Entry>
+                <Entry>{entry.date}</Entry>
+              </GameEntry>
+            ))
+          ) : (
+            <></>
+          )}
+        </History>
       </StartContainer>
     </Container>
   );

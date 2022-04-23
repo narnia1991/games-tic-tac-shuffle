@@ -1,5 +1,5 @@
 import styled from "@emotion/styled";
-import { bgColor } from "../../variables";
+import { bgColor, fallBackFont, textPrimary } from "../../variables";
 
 export const Container = styled.div`
   height: 100vh;
@@ -7,4 +7,7 @@ export const Container = styled.div`
   justify-content: center;
   background-color: ${bgColor};
   margin: 0;
+  color: ${textPrimary};
+  font-family: ${fallBackFont};
+  font-size: 1.2rem;
 `;
