@@ -1,5 +1,5 @@
 import styled from "@emotion/styled";
-import { FC } from "react";
+import { FC, RefObject } from "react";
 
 const StyledInput = styled.input`
   padding: 1rem;
@@ -8,10 +8,18 @@ const StyledInput = styled.input`
 
 type Props = {
   name: string;
+  forwardRef: RefObject<HTMLInputElement>;
 };
 
-const Input: FC<Props> = ({ name, ...props }) => {
-  return <StyledInput type="text" name={name} {...props}></StyledInput>;
+const Input: FC<Props> = ({ name, forwardRef, ...props }) => {
+  return (
+    <StyledInput
+      type="text"
+      ref={forwardRef}
+      name={name}
+      {...props}
+    ></StyledInput>
+  );
 };
 
 export default Input;

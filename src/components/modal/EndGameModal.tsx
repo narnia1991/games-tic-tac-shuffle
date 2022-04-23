@@ -61,7 +61,7 @@ const EndGameModal: FC<Props> = ({ isOpen, onClose }) => {
     }
 
     setHeader(headerText);
-  }, []);
+  }, [p1, p2]);
 
   return (
     <Modal

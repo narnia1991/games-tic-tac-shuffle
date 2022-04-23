@@ -38,3 +38,4 @@ two-player game but allow an option to compete with a bot.
 
 - Got the base board design idea from https://github.com/WebDevSimplified/JavaScript-Tic-Tac-Toe/blob/master/script.js
 - Got the minimax AI logic from https://github.com/beaucarnes/fcc-project-tutorials/blob/master/tictactoe/7/script.js
+- More in depth Minimax article https://www.freecodecamp.org/news/how-to-make-your-tic-tac-toe-game-unbeatable-by-using-the-minimax-algorithm-9d690bad4b37

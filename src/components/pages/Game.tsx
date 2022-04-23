@@ -30,7 +30,7 @@ export const getNames = (dispatch: Dispatch<GameAction>) => {
     type: "SET_PLAYER_NAMES",
     payload: {
       p1: p1Name,
-      p2: p2Name,
+      p2: p2Name || "Computer",
     },
   });
 };
@@ -64,10 +64,6 @@ const Game: FC = () => {
         </Banner>
 
         {p1.name && <Board />}
-
-        <ButtonWrapper>
-          <Button variant="filled">End Game</Button>
-        </ButtonWrapper>
       </Wrapper>
     </Container>
   );
