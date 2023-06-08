@@ -42,7 +42,7 @@ type Props = {
 const StartGameModal: FC<Props> = ({ isOpen, onClose, isTwoPlayer }) => {
   const handleCloseModal = useCallback(() => {
     onClose();
-  }, []);
+  }, [onClose]);
 
   const p1Ref: RefObject<HTMLInputElement> = useRef(null);
   const p2Ref: RefObject<HTMLInputElement> = useRef(null);
@@ -66,7 +66,7 @@ const StartGameModal: FC<Props> = ({ isOpen, onClose, isTwoPlayer }) => {
 
     window.location.href = `/${p1Name}`;
     onClose();
-  }, []);
+  }, [onClose, isTwoPlayer]);
 
   return (
     <Modal isOpen={isOpen} onClose={handleCloseModal}>

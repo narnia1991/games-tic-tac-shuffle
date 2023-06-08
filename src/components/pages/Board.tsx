@@ -198,6 +198,7 @@ const Board: FC = () => {
       }
 
       const currentClass = currentPlayer === "p2" ? CIRCLE_CLASS : X_CLASS;
+
       const currentContent = currentPlayer === "p2" ? "  " : " ";
       placeMark(cell, currentClass, currentContent);
       if (checkWin(currentPlayer)) {
@@ -221,7 +222,7 @@ const Board: FC = () => {
     }
   };
 
-  const startGame = () => {
+  const startGame = useCallback(() => {
     (dispatch as Dispatch<GameAction>)({ type: "RESET_MATCH" });
     const cellElements = cellArrRef.current;
 
@@ -233,11 +234,11 @@ const Board: FC = () => {
       });
     }
     setBoardHoverClass(CIRCLE_CLASS);
-  };
+  }, [dispatch, setBoardHoverClass]);
 
   useEffect(() => {
     startGame();
-  }, []);
+  }, [startGame]);
 
   const handleModalClose = () => {
     startGame();
@@ -255,6 +256,16 @@ const Board: FC = () => {
     startGame();
     window.location.href = "/";
   };
+
+  const createRef = useCallback(
+    (cellArr: RefObject<Array<HTMLDivElement>>, index: number) =>
+      (element: HTMLDivElement) => {
+        if (cellArr.current) {
+          cellArr.current[index] = element;
+        }
+      },
+    []
+  );
 
   return (
     <StyledBoard className="board" ref={boardRef}>
@@ -274,8 +285,7 @@ const Board: FC = () => {
       {
         Array.from(Array(9)).map((_, i) => (
           <StyledCell
-            // @ts-expect-error dirty way of creating ref array
-            ref={(element) => (cellArrRef.current[i] = element)}
+            ref={createRef(cellArrRef, i)}
             key={`${i}`}
             id={`${i}`}
             onClick={handleCellClick}

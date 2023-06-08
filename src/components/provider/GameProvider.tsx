@@ -4,7 +4,6 @@ import {
   FC,
   ReactElement,
   useContext,
-  useEffect,
   useReducer,
 } from "react";
 import { GameAction, GameState, Player } from "../types/types";
