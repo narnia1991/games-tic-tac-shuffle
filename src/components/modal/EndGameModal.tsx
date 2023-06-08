@@ -1,6 +1,6 @@
 import styled from "@emotion/styled";
 import { FC, useEffect, useState } from "react";
-import { addDoc, collection, getDocs } from "firebase/firestore";
+import { addDoc, collection } from "firebase/firestore";
 
 import { fallBackFont, textPrimary } from "../../variables";
 import Button from "../common/Button";

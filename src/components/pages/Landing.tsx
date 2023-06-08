@@ -5,7 +5,6 @@ import Checkbox from "../common/Checkbox";
 import Button from "../common/Button";
 import StartGameModal from "../modal/StartGameModal";
 import { Container } from "../styled/Container";
-import Game from "./Game";
 import { collection, getDocs, orderBy, query } from "firebase/firestore";
 import { db } from "../../firebase";
 import { dataToGameList } from "../helpers/parse";
@@ -14,7 +13,7 @@ const StartContainer = styled(Container)`
   height: auto;
   flex-direction: column;
   margin-top: 5rem;
-  width: 30vw;
+  width: 70vw;
 `;
 
 const ModeContainer = styled(Container)`
@@ -85,7 +84,7 @@ const Landing: FC = () => {
     };
 
     loadGames();
-  }, []);
+  }, [gameCollectionRef]);
 
   return (
     <Container>

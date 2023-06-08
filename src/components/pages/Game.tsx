@@ -1,10 +1,8 @@
 import { Dispatch, FC, useEffect } from "react";
-import Button from "../common/Button";
 import { Container } from "../styled/Container";
 import Board from "./Board";
 import {
   Banner,
-  ButtonWrapper,
   PlayerContainer,
   TextDisplay,
   Wrapper,
@@ -29,8 +27,8 @@ export const getNames = (dispatch: Dispatch<GameAction>) => {
   dispatch({
     type: "SET_PLAYER_NAMES",
     payload: {
-      p1: p1Name,
-      p2: p2Name || "Computer",
+      p1: decodeURI(p1Name),
+      p2: decodeURI(p2Name) || "Computer",
     },
   });
 };
@@ -42,7 +40,7 @@ const Game: FC = () => {
 
   useEffect(() => {
     getNames(dispatch as Dispatch<GameAction>);
-  }, []);
+  }, [dispatch]);
 
   return (
     <Container>
