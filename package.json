@@ -2,6 +2,7 @@
   "name": "tictocktwo",
   "version": "0.1.0",
   "private": true,
+  "homepage": "https://narnia1991.github.io/tic-tac-shuffle",
   "dependencies": {
     "@emotion/react": "11.11.1",
     "@emotion/styled": "11.11.0",
@@ -26,7 +27,9 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "predeploy": "yarn build",
+    "deploy": "yarn predeploy && gh-pages -d build"
   },
   "eslintConfig": {
     "extends": [
@@ -37,7 +40,6 @@
   "resolutions": {
     "nth-check": "2.0.1",
     "terser": "5.14.2",
-    "loader-utils": "3.2.1",
     "json5": "2.2.2",
     "minimatch": "3.0.5",
     "dns-packet": "5.4.0",
@@ -54,5 +56,8 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "gh-pages": "5.0.0"
   }
 }
