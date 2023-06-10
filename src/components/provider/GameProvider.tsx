@@ -56,12 +56,6 @@ export const GameDispatchContext = createContext(
 const GameProvider: FC<{ children: ReactElement }> = ({ children }) => {
   const [state, dispatch] = useReducer(reducer, DEFAULT_GAME_STATE);
 
-  // useEffect(() => {
-  //   return () => {
-  //     dispatch({ type: "RESET_GAME" });
-  //   };
-  // }, []);
-
   return (
     <GameStateContext.Provider value={state}>
       <GameDispatchContext.Provider value={dispatch}>
