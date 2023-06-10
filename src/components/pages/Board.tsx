@@ -9,9 +9,10 @@ import {
   useState,
 } from "react";
 import { ROOT_URL } from "../../App";
-import { winningCombinations } from "../../schema";
+import { checkWin, minimax } from "../helpers/minimax";
 import EndGameModal from "../modal/EndGameModal";
 import EndMatchModal from "../modal/EndMatchModal";
+import ShuffleClass from "../modal/ShuffleClass";
 import { useGame } from "../provider/GameProvider";
 import { StyledBoard } from "../styled/StyledBoard";
 import { StyledCell } from "../styled/StyledCell";
@@ -30,6 +31,7 @@ const Board: FC = () => {
   });
 
   const { currentPlayer, gameMatch } = state as GameState;
+  const [showShuffle, setShowShuffle] = useState(false);
   const [isEndMatchModalOpen, setIsEndMatchModalOpen] = useState(false);
   const [isEndGameModalOpen, setIsEndGameModalOpen] = useState(false);
   const [result, setResult] = useState("");
@@ -39,17 +41,6 @@ const Board: FC = () => {
   const boardRef: RefObject<HTMLDivElement> = useRef(null);
 
   /* Start AI Functions */
-
-  const emptySquares = (cellArr?: RefObject<Array<HTMLDivElement>>) => {
-    const cells = !!cellArr ? cellArr.current : cellArrRef.current;
-
-    return cells!.filter(
-      (cell: HTMLDivElement) =>
-        !cell.classList.contains(X_CLASS) &&
-        !cell.classList.contains(CIRCLE_CLASS) &&
-        cell.innerHTML === ""
-    );
-  };
 
   const clearCells = () => {
     cellArrRef.current?.forEach((cell) => {
@@ -62,83 +53,10 @@ const Board: FC = () => {
     });
   };
 
-  const checkWin = useCallback(
-    (player: Player, cellArr?: Array<HTMLDivElement>) => {
-      const cellElements = cellArr || cellArrRef.current;
-      const playChar = player === "p1" ? " " : "  ";
-
-      if (cellElements) {
-        return winningCombinations.some((combination) => {
-          return combination.every((index) => {
-            return cellElements[index].innerHTML === playChar;
-          });
-        });
-      }
-    },
-    []
-  );
-
-  const minimax = useCallback(
-    (newCellArr: RefObject<Array<HTMLDivElement>>, player: Player) => {
-      const newCArr = newCellArr.current as Array<HTMLDivElement>;
-      let availSpots = emptySquares();
-
-      if (checkWin("p1", newCArr)) {
-        return { score: -10 };
-      } else if (checkWin("p2", newCArr)) {
-        return { score: 10 };
-      } else if (availSpots.length === 0) {
-        return { score: 0 };
-      }
-
-      let moves = [];
-      for (let i = 0; i < availSpots.length; i += 1) {
-        let move: any = {};
-        // @ts-expect-error html cant be index
-        newCArr[availSpots[i].id].innerHTML = player === "p1" ? " " : "  ";
-
-        if (player === "p2") {
-          let result = minimax(newCellArr, "p1");
-          move.score = result.score;
-        } else {
-          let result = minimax(newCellArr, "p2");
-          move.score = result.score;
-        }
-
-        moves.push(move);
-      }
-
-      let bestMove = 0;
-      if (player === "p2") {
-        let bestScore = -10000;
-        for (let i = 0; i < moves.length; i++) {
-          if (moves[i].score > bestScore) {
-            bestScore = moves[i].score;
-            bestMove = i;
-          }
-        }
-      } else {
-        let bestScore = 10000;
-        for (let i = 0; i < moves.length; i++) {
-          if (moves[i].score < bestScore) {
-            bestScore = moves[i].score;
-            bestMove = i;
-          }
-        }
-      }
-
-      return {
-        index: newCArr[Number(availSpots[bestMove].id)],
-        score: moves[bestMove].score,
-      };
-    },
-    [checkWin]
-  );
-
   const bestSpot = useCallback(() => {
     const timeout = setTimeout(() => {
       if (cellArrRef && !isEndGameModalOpen && !isEndMatchModalOpen) {
-        minimax(cellArrRef, currentPlayer).index!.click();
+        minimax(cellArrRef, currentPlayer, cellArrRef.current).index!.click();
         clearCells();
       }
       clearTimeout(timeout);
@@ -218,7 +136,7 @@ const Board: FC = () => {
           clearTimeout(pause);
         }, 100);
 
-        if (checkWin(currentPlayer)) {
+        if (checkWin(currentPlayer, undefined, cellArrRef.current)) {
           showResult(false);
         } else if (isDraw()) {
           showResult(true);
@@ -240,7 +158,8 @@ const Board: FC = () => {
             payload: currentPlayer === "p1" ? "p2" : "p1",
           });
 
-          setBoardHoverClass(currentClass);
+          setShowShuffle(true);
+          // setBoardHoverClass(currentClass);
         }
 
         if (isVSComputer && currentPlayer === "p1") {
@@ -294,7 +213,7 @@ const Board: FC = () => {
     window.location.href = ROOT_URL;
   };
 
-  const createRef = useCallback(
+  const createCellRefs = useCallback(
     (cellArr: RefObject<Array<HTMLDivElement>>, index: number) =>
       (element: HTMLDivElement) => {
         if (cellArr.current) {
@@ -307,6 +226,11 @@ const Board: FC = () => {
   useEffect(() => {
     startGame();
   }, [startGame]);
+
+  useEffect(() => {
+    if (!!showShuffle) {
+    }
+  }, [showShuffle]);
 
   return (
     <StyledBoard className="board" ref={boardRef}>
@@ -326,13 +250,14 @@ const Board: FC = () => {
       {
         Array.from(Array(9)).map((_, i) => (
           <StyledCell
-            ref={createRef(cellArrRef, i)}
+            ref={createCellRefs(cellArrRef, i)}
             key={`${i}`}
             id={`${i}`}
             onClick={handleCellClick}
           ></StyledCell>
         )) as ReactNode
       }
+      <ShuffleClass isOpen={showShuffle} />
     </StyledBoard>
   );
 };
