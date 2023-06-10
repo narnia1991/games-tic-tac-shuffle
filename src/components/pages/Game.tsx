@@ -9,6 +9,7 @@ import {
 } from "../styled/StyledGame";
 import { useGame } from "../provider/GameProvider";
 import { GameAction, GameState } from "../types/types";
+import { ROOT_URL } from "../../App";
 
 /*
   TODO:
@@ -21,8 +22,10 @@ import { GameAction, GameState } from "../types/types";
 */
 
 export const getNames = (dispatch: Dispatch<GameAction>) => {
-  const p1Name = window.location.pathname.split("/").pop()?.split("_")[0] || "";
-  const p2Name = window.location.pathname.split("/").pop()?.split("_")[1] || "";
+  const p1Name =
+    window.location.pathname.split(ROOT_URL).pop()?.split("_")[0] || "";
+  const p2Name =
+    window.location.pathname.split(ROOT_URL).pop()?.split("_")[1] || "";
 
   dispatch({
     type: "SET_PLAYER_NAMES",

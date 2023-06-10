@@ -1,5 +1,6 @@
 import styled from "@emotion/styled";
 import { FC, RefObject, useCallback, useRef } from "react";
+import { ROOT_URL } from "../../App";
 import { fallBackFont, textPrimary } from "../../variables";
 import Button from "../common/Button";
 import Input from "../common/Input";
@@ -59,12 +60,12 @@ const StartGameModal: FC<Props> = ({ isOpen, onClose, isTwoPlayer }) => {
 
     if (!!player2?.value) {
       const p2Name = player2.value;
-      window.location.href = `/${p1Name}_${p2Name}`;
+      window.location.href = `${ROOT_URL}/${p1Name}_${p2Name}`;
       onClose();
       return;
     }
 
-    window.location.href = `/${p1Name}`;
+    window.location.href = `${ROOT_URL}/${p1Name}`;
     onClose();
   }, [onClose, isTwoPlayer]);
 
