@@ -115,7 +115,7 @@ const Board: FC = () => {
   );
 
   const handleCellClick = useCallback(
-    (e) => {
+    (e: any) => {
       try {
         const cell = e.target;
 
@@ -143,23 +143,13 @@ const Board: FC = () => {
         } else {
           // swap turns
           if (currentPlayer === "p2") {
-            const shuffledClass =
-              Math.random() >= 0.5
-                ? { p1: X_CLASS, p2: CIRCLE_CLASS }
-                : { p1: CIRCLE_CLASS, p2: X_CLASS };
-
-            setPlayerClass(shuffledClass);
-
-            currentClass = shuffledClass.p1;
+            setShowShuffle(true);
           }
 
           (dispatch as Dispatch<GameAction>)({
             type: "SET_CURRENT_PLAYER",
             payload: currentPlayer === "p1" ? "p2" : "p1",
           });
-
-          setShowShuffle(true);
-          // setBoardHoverClass(currentClass);
         }
 
         if (isVSComputer && currentPlayer === "p1") {
@@ -223,6 +213,14 @@ const Board: FC = () => {
     []
   );
 
+  const handleAcceptShuffle = useCallback(
+    (shuffledClass: string) => {
+      setBoardHoverClass(shuffledClass);
+      setShowShuffle(false);
+    },
+    [setBoardHoverClass]
+  );
+
   useEffect(() => {
     startGame();
   }, [startGame]);
@@ -257,7 +255,7 @@ const Board: FC = () => {
           ></StyledCell>
         )) as ReactNode
       }
-      <ShuffleClass isOpen={showShuffle} />
+      <ShuffleClass isOpen={showShuffle} onClose={handleAcceptShuffle} />
     </StyledBoard>
   );
 };
