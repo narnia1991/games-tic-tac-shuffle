@@ -55,14 +55,47 @@ const TicTacO = styled.div`
   backface-visibility: hidden;
 `;
 
-const TicTacContainer = styled.div`
+const TicTacContainerX = styled.div`
   display: flex;
   position: relative;
   flex-direction: column;
   align-items: center;
+  margin-top: 4rem;
+  transform-style: preserve-3d;
+  height: 6rem;
+  animation: ${spinX} 3s forwards;
+`;
+
+const TicTacContainerO = styled.div`
+  display: flex;
+  position: relative;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 4rem;
   transform-style: preserve-3d;
   height: 6rem;
   animation: ${spinO} 3s forwards;
+`;
+
+const ShuffleButton = styled.button`
+  display: block;
+  height: 3rem;
+  width: 9rem;
+  margin: 1rem auto;
+  padding: 1rem;
+  font-size: 1rem;
+  color: burlywood;
+  background-color: rgba(119, 170, 187, 0.333);
+`;
+
+const ShuffleTitle = styled.span`
+  display: block;
+  text-align: center;
+  height: 3rem;
+  margin: 1rem auto;
+  padding: 1rem;
+  font-size: 4rem;
+  color: burlywood;
 `;
 
 type Props = {
@@ -71,9 +104,7 @@ type Props = {
 };
 
 const ShuffleClass: FC<Props> = ({ isOpen, onClose }) => {
-  const tictacClassRef: MutableRefObject<string> = useRef("X");
-
-  const [ticTacAnimation, setTicTacAnimation] = useState<boolean>(false);
+  const tictacClassRef: MutableRefObject<string> = useRef("");
 
   const handleClose = useCallback(() => {
     onClose?.(tictacClassRef.current);
@@ -82,10 +113,6 @@ const ShuffleClass: FC<Props> = ({ isOpen, onClose }) => {
   useEffect(() => {
     const tictacShuffle = Math.floor(Math.random() * 2);
     tictacClassRef.current = tictacShuffle ? X_CLASS : CIRCLE_CLASS;
-    const shuffleTimeout = setTimeout(() => {
-      setTicTacAnimation(!!tictacShuffle);
-      clearTimeout(shuffleTimeout);
-    }, 100);
   }, []);
 
   return (
@@ -94,11 +121,21 @@ const ShuffleClass: FC<Props> = ({ isOpen, onClose }) => {
       onClose={handleClose}
       shouldCloseOnOverlayClick={false}
     >
-      {/* @ts-ignore */}
-      <TicTacContainer style={{ "--spinVar": ticTacAnimation ? spinX : spinO }}>
-        <TicTacX>X</TicTacX>
-        <TicTacO>O</TicTacO>
-      </TicTacContainer>
+      <ShuffleTitle>You are</ShuffleTitle>
+      {tictacClassRef.current === X_CLASS ? (
+        <TicTacContainerX>
+          <TicTacX>X</TicTacX>
+          <TicTacO>O</TicTacO>
+        </TicTacContainerX>
+      ) : tictacClassRef.current === CIRCLE_CLASS ? (
+        <TicTacContainerO>
+          <TicTacX>X</TicTacX>
+          <TicTacO>O</TicTacO>
+        </TicTacContainerO>
+      ) : (
+        <></>
+      )}
+      <ShuffleButton onClick={handleClose}>OK</ShuffleButton>
     </Modal>
   );
 };

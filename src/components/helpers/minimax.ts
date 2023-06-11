@@ -5,7 +5,7 @@ import { Player } from "../types/types";
 
 export const emptySquares = (
   cellArr?: RefObject<Array<HTMLDivElement>>,
-  cellValue
+  cellValue?: Array<HTMLDivElement>
 ) => {
   const cells = !!cellArr ? cellArr.current : cellValue;
 
@@ -20,7 +20,7 @@ export const emptySquares = (
 export const checkWin = (
   player: Player,
   cellArr?: Array<HTMLDivElement>,
-  cellValue
+  cellValue?: any
 ) => {
   const cellElements = cellArr || cellValue;
   const playChar = player === "p1" ? " " : "  ";
@@ -37,10 +37,10 @@ export const checkWin = (
 export const minimax = (
   newCellArr: RefObject<Array<HTMLDivElement>>,
   player: Player,
-  cellValue
+  cellValue?: any
 ) => {
   const newCArr = newCellArr.current as Array<HTMLDivElement>;
-  let availSpots = emptySquares(_, cellValue);
+  let availSpots = emptySquares(undefined, cellValue);
 
   if (checkWin("p1", newCArr, cellValue)) {
     return { score: -10 };
@@ -53,7 +53,7 @@ export const minimax = (
   let moves = [];
   for (let i = 0; i < availSpots.length; i += 1) {
     let move: any = {};
-    newCArr[availSpots[i].id].innerHTML = player === "p1" ? " " : "  ";
+    newCArr[availSpots[i].id as any].innerHTML = player === "p1" ? " " : "  ";
 
     if (player === "p2") {
       let result = minimax(newCellArr, "p1", cellValue);
