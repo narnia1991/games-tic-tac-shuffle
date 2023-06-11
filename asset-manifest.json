@@ -1,0 +1,10 @@
+{
+  "files": {
+    "main.js": "/games/tic-tac-shuffle/static/js/main.f2a5028f.js",
+    "index.html": "/games/tic-tac-shuffle/index.html",
+    "main.f2a5028f.js.map": "/games/tic-tac-shuffle/static/js/main.f2a5028f.js.map"
+  },
+  "entrypoints": [
+    "static/js/main.f2a5028f.js"
+  ]
+}
