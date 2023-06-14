@@ -3,9 +3,9 @@ import { textPrimary } from "../../variables";
 import { Container } from "./Container";
 
 export const Banner = styled(Container)`
-  width: 90vw;
   height: 10rem;
   justify-content: space-between;
+  display: flex;
 `;
 
 export const Wrapper = styled(Container)`
@@ -16,7 +16,10 @@ export const Wrapper = styled(Container)`
 
 export const PlayerContainer = styled(Container)`
   height: inherit;
+  font-size: 2rem;
   flex-direction: column;
+  flex: 1;
+  padding: 1rem;
 `;
 
 export const ButtonWrapper = styled.div`
