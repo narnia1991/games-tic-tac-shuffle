@@ -23,9 +23,9 @@ import { ROOT_URL } from "../../App";
 
 export const getNames = (dispatch: Dispatch<GameAction>) => {
   const p1Name =
-    window.location.pathname.split(ROOT_URL).pop()?.split("_")[0] || "";
+    window.location.pathname.split(`${ROOT_URL}/`).pop()?.split("_")[0] || "";
   const p2Name =
-    window.location.pathname.split(ROOT_URL).pop()?.split("_")[1] || "";
+    window.location.pathname.split(`${ROOT_URL}/`).pop()?.split("_")[1] || "";
 
   dispatch({
     type: "SET_PLAYER_NAMES",
@@ -54,11 +54,11 @@ const Game: FC = () => {
             <TextDisplay>Score: {p1.score}</TextDisplay>
           </PlayerContainer>
 
-          <PlayerContainer>
+          <PlayerContainer style={{ textAlign: "center" }}>
             <TextDisplay>{gameMatch[currentPlayer].name}'s Turn</TextDisplay>
           </PlayerContainer>
 
-          <PlayerContainer>
+          <PlayerContainer style={{ textAlign: "right" }}>
             <TextDisplay>{p2.name}</TextDisplay>
             <TextDisplay>Score: {p2.score}</TextDisplay>
           </PlayerContainer>
