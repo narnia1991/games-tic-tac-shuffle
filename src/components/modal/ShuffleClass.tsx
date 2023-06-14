@@ -63,7 +63,7 @@ const TicTacContainerX = styled.div`
   margin-top: 4rem;
   transform-style: preserve-3d;
   height: 6rem;
-  animation: ${spinX} 3s forwards;
+  animation: ${spinX} 1s forwards;
 `;
 
 const TicTacContainerO = styled.div`
@@ -74,7 +74,7 @@ const TicTacContainerO = styled.div`
   margin-top: 4rem;
   transform-style: preserve-3d;
   height: 6rem;
-  animation: ${spinO} 3s forwards;
+  animation: ${spinO} 1s forwards;
 `;
 
 const ShuffleButton = styled.button`
