@@ -57,34 +57,41 @@ const Landing: FC = () => {
   const [gameList, setGameList] = useState<any>([]);
   const [isStartModalOpen, setIsStartModalOpen] = useState(false);
 
-  const handleModeClick = (param: string) => {
-    setMode(param);
-  };
-
-  const handleStartClick = (e: MouseEvent) => {
-    e.preventDefault();
-    setIsStartModalOpen(true);
-  };
+  const handleStartClick = useCallback(
+    (e: MouseEvent) => {
+      e.preventDefault();
+      setIsStartModalOpen(true);
+    },
+    [mode]
+  );
 
   const closeStartModal = useCallback(() => {
     setIsStartModalOpen(false);
   }, []);
 
+  const pickMode = useCallback(
+    (mode: string) => () => {
+      setMode(mode);
+    },
+    []
+  );
+
+  const loadGames = useCallback(async () => {
+    const data = await getDocs(
+      query(gameCollectionRef, orderBy("date", "desc"))
+    );
+
+    setGameList(
+      data.docs.map((entry) =>
+        dataToGameList(entry.data(), entry.id)
+      ) as Array<any>
+    );
+  }, [getDocs, dataToGameList]);
+
   useEffect(() => {
     setMode("PVP");
-    const loadGames = async () => {
-      const data = await getDocs(
-        query(gameCollectionRef, orderBy("date", "desc"))
-      );
-      setGameList(
-        data.docs.map((entry) =>
-          dataToGameList(entry.data(), entry.id)
-        ) as Array<any>
-      );
-    };
-
     loadGames();
-  }, [gameCollectionRef]);
+  }, []);
 
   return (
     <Container>
@@ -100,14 +107,14 @@ const Landing: FC = () => {
         <ModeContainer>
           <Checkbox
             label="VS Player"
-            onClick={() => handleModeClick("PVP")}
+            onClick={pickMode("PVP")}
             name="mode"
             value="PVP"
             checked={mode === "PVP"}
           ></Checkbox>
           <Checkbox
             label="VS Computer"
-            onClick={() => handleModeClick("VSAI")}
+            onClick={pickMode("VSAI")}
             name="mode"
             value="VSAI"
             checked={mode === "VSAI"}

@@ -108,7 +108,7 @@ const ShuffleClass: FC<Props> = ({ isOpen, onClose }) => {
 
   const handleClose = useCallback(() => {
     onClose?.(tictacClassRef.current);
-  }, []);
+  }, [onClose]);
 
   useEffect(() => {
     const tictacShuffle = Math.floor(Math.random() * 2);
