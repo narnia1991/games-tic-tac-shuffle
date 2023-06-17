@@ -76,7 +76,7 @@ const StartGameModal: FC<Props> = ({ isOpen, onClose, isTwoPlayer }) => {
           <Label>Player 1:</Label>
           <Input name="player1" forwardRef={p1Ref}></Input>
         </InputContainer>
-        {isTwoPlayer && (
+        {!!isTwoPlayer && (
           <InputContainer>
             <Label>Player 2:</Label>
             <Input name="player2" forwardRef={p2Ref}></Input>

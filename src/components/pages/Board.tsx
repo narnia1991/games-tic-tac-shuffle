@@ -16,7 +16,7 @@ import ShuffleClass from "../modal/ShuffleClass";
 import { useGame } from "../provider/GameProvider";
 import { StyledBoard } from "../styled/StyledBoard";
 import { StyledCell } from "../styled/StyledCell";
-import { GameAction, GameState, Player } from "../types/types";
+import { GameAction, GameState } from "../types/types";
 import { getNames } from "./Game";
 
 export const X_CLASS = "cross";
@@ -30,6 +30,8 @@ const Board: FC = () => {
     p2: CIRCLE_CLASS,
   });
 
+  const [moves, setMoves] = useState<Record<string, string>[]>([]);
+  const [hoverClass, setHoverClass] = useState(X_CLASS);
   const { currentPlayer, gameMatch } = state as GameState;
   const [showShuffle, setShowShuffle] = useState(false);
   const [isEndMatchModalOpen, setIsEndMatchModalOpen] = useState(false);
@@ -39,6 +41,33 @@ const Board: FC = () => {
   const isVSComputer = !window.location.pathname.split("_")[1];
   const cellArrRef: RefObject<Array<HTMLDivElement>> = useRef([]);
   const boardRef: RefObject<HTMLDivElement> = useRef(null);
+
+  const handleModalClose = () => {
+    startGame();
+    setIsEndMatchModalOpen(false);
+  };
+
+  const handleOpenEndGame = useCallback(() => {
+    setIsEndGameModalOpen(true);
+  }, []);
+
+  const handleEndGameModalClose = () => {
+    (dispatch as Dispatch<GameAction>)({ type: "RESET_GAME" });
+    getNames(dispatch as Dispatch<GameAction>);
+    setIsEndGameModalOpen(false);
+    startGame();
+    window.location.href = ROOT_URL;
+  };
+
+  const createCellRefs = useCallback(
+    (cellArr: RefObject<Array<HTMLDivElement>>, index: number) =>
+      (element: HTMLDivElement) => {
+        if (cellArr.current) {
+          cellArr.current[index] = element;
+        }
+      },
+    []
+  );
 
   /* Start AI Functions */
 
@@ -60,31 +89,32 @@ const Board: FC = () => {
         clearCells();
       }
       clearTimeout(timeout);
-    }, 1000);
-  }, [currentPlayer, isEndGameModalOpen, isEndMatchModalOpen, minimax]);
+    });
+  }, [currentPlayer, isEndGameModalOpen, isEndMatchModalOpen]);
 
   /* End AI Functions */
 
-  const setBoardHoverClass = useCallback((currentClass: string) => {
-    const gameBoard = boardRef.current;
-    if (gameBoard) {
-      gameBoard.classList.remove(X_CLASS);
-      gameBoard.classList.remove(CIRCLE_CLASS);
-      if (currentClass === CIRCLE_CLASS) {
-        gameBoard.classList.add(X_CLASS);
-      } else {
-        gameBoard.classList.add(CIRCLE_CLASS);
-      }
-    }
-  }, []);
+  // const setHoverClass = useCallback((currentClass: string) => {
+  //   const gameBoard = boardRef.current;
+  //   console.log(currentClass, "setHoverClass");
+  //   if (gameBoard) {
+  //     gameBoard.classList.remove(X_CLASS);
+  //     gameBoard.classList.remove(CIRCLE_CLASS);
+  //     if (currentClass === CIRCLE_CLASS) {
+  //       gameBoard.classList.add(X_CLASS);
+  //     } else {
+  //       gameBoard.classList.add(CIRCLE_CLASS);
+  //     }
+  //   }
+  // }, []);
 
-  const placeMark = useCallback(
-    (cell: HTMLDivElement, currentClass: string, currentContent: string) => {
-      cell.classList.add(currentClass);
-      cell.innerHTML = currentContent;
-    },
-    []
-  );
+  // const placeMark = useCallback(
+  //   (cell: HTMLDivElement, currentClass: string, currentContent: string) => {
+  //     cell.classList.add(currentClass);
+  //     cell.innerHTML = currentContent;
+  //   },
+  //   []
+  // );
 
   const isDraw = () => {
     const cellElements = cellArrRef.current;
@@ -115,22 +145,23 @@ const Board: FC = () => {
   );
 
   const handleCellClick = useCallback(
-    (e: any) => {
+    (i: number) => (e: any) => {
       try {
-        const cell = e.target;
+        // const cell = e.target;
 
-        if (
-          cell.classList.contains(X_CLASS) ||
-          cell.classList.contains(CIRCLE_CLASS)
-        ) {
+        // Don't do anything if cell has contents
+        // if (
+        //   cell.classList.contains(X_CLASS) ||
+        //   cell.classList.contains(CIRCLE_CLASS)
+        // ) {
+        //   return;
+        // }
+        if (!!(moves[moves.length - 1] ?? [])[i]) {
           return;
         }
 
         let currentClass = playerClass[currentPlayer];
-        console.log(playerClass);
-
-        const currentContent = currentPlayer === "p2" ? "  " : " ";
-        placeMark(cell, currentClass, currentContent);
+        setMoves([...moves, { ...moves[moves.length - 1], [i]: currentClass }]);
 
         const pause = setTimeout(() => {
           clearTimeout(pause);
@@ -141,15 +172,20 @@ const Board: FC = () => {
         } else if (isDraw()) {
           showResult(true);
         } else {
-          // swap turns
-          if (currentPlayer === "p2") {
-            setShowShuffle(true);
-          }
-
           (dispatch as Dispatch<GameAction>)({
             type: "SET_CURRENT_PLAYER",
             payload: currentPlayer === "p1" ? "p2" : "p1",
           });
+          // swap turns
+          if (currentPlayer === "p2") {
+            const shuffleTimeout = setTimeout(() => {
+              setShowShuffle(true);
+              clearTimeout(shuffleTimeout);
+            }, 1000);
+            return;
+          }
+
+          setHoverClass(currentClass);
         }
 
         if (isVSComputer && currentPlayer === "p1") {
@@ -161,14 +197,12 @@ const Board: FC = () => {
     },
     [
       playerClass,
-      placeMark,
       bestSpot,
-      checkWin,
       currentPlayer,
       dispatch,
       isVSComputer,
-      setBoardHoverClass,
       showResult,
+      moves,
     ]
   );
 
@@ -183,55 +217,27 @@ const Board: FC = () => {
         cell.innerHTML = "";
       });
     }
-    setBoardHoverClass(CIRCLE_CLASS);
-  }, [dispatch, setBoardHoverClass]);
+    setHoverClass(CIRCLE_CLASS);
+  }, [dispatch]);
 
-  const handleModalClose = () => {
-    startGame();
-    setIsEndMatchModalOpen(false);
-  };
+  const handleAcceptShuffle = useCallback((shuffledClass: string) => {
+    setShowShuffle(false);
+    setPlayerClass({
+      p1: shuffledClass,
+      p2: shuffledClass === X_CLASS ? X_CLASS : CIRCLE_CLASS,
+    });
 
-  const handleOpenEndGame = useCallback(() => {
-    setIsEndGameModalOpen(true);
+    setHoverClass(shuffledClass);
   }, []);
 
-  const handleEndGameModalClose = () => {
-    (dispatch as Dispatch<GameAction>)({ type: "RESET_GAME" });
-    getNames(dispatch as Dispatch<GameAction>);
-    setIsEndGameModalOpen(false);
-    startGame();
-    window.location.href = ROOT_URL;
-  };
-
-  const createCellRefs = useCallback(
-    (cellArr: RefObject<Array<HTMLDivElement>>, index: number) =>
-      (element: HTMLDivElement) => {
-        if (cellArr.current) {
-          cellArr.current[index] = element;
-        }
-      },
-    []
-  );
-
-  const handleAcceptShuffle = useCallback(
-    (shuffledClass: string) => {
-      setBoardHoverClass(shuffledClass);
-      setShowShuffle(false);
-    },
-    [setBoardHoverClass]
-  );
+  console.log(JSON.stringify(moves));
 
   useEffect(() => {
     startGame();
   }, [startGame]);
 
-  useEffect(() => {
-    if (!!showShuffle) {
-    }
-  }, [showShuffle]);
-
   return (
-    <StyledBoard className="board" ref={boardRef}>
+    <StyledBoard className={`board ${hoverClass}`} ref={boardRef}>
       <EndMatchModal
         gameMatch={gameMatch}
         header={result}
@@ -248,10 +254,11 @@ const Board: FC = () => {
       {
         Array.from(Array(9)).map((_, i) => (
           <StyledCell
+            className={`${(moves[moves.length - 1] ?? [])[i] ?? ""}`}
             ref={createCellRefs(cellArrRef, i)}
             key={`${i}`}
             id={`${i}`}
-            onClick={handleCellClick}
+            onClick={handleCellClick(i)}
           ></StyledCell>
         )) as ReactNode
       }
