@@ -4,6 +4,7 @@ export const StyledBoard = styled.div`
   width: 100vw;
   height: 100vh;
   display: grid;
+  color: transparent;
   justify-content: center;
   align-content: center;
   justify-items: center;
