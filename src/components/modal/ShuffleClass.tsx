@@ -1,18 +1,13 @@
 // concept from www.youtube(dot)com/watch?v=yXEcd0eGrpw
 
 import styled from "@emotion/styled";
-import { css, Keyframes, keyframes } from "@emotion/react";
-import {
-  FC,
-  MutableRefObject,
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import { keyframes } from "@emotion/react";
+import { FC, useCallback, useEffect, useState } from "react";
 
 import Modal from "../common/Modal";
 import { CIRCLE_CLASS, X_CLASS } from "../pages/Board";
+import { Player } from "../types/types";
+import { ROOT_URL } from "../../App";
 
 const spinX = keyframes`
   0%{
@@ -100,20 +95,30 @@ const ShuffleTitle = styled.span`
 
 type Props = {
   isOpen: boolean;
-  onClose(current: string): void;
+  onClose(currentClass: string, currentPlayer: Player): void;
 };
 
 const ShuffleClass: FC<Props> = ({ isOpen, onClose }) => {
-  const tictacClassRef: MutableRefObject<string> = useRef("");
+  const [ticTacClass, setTicTacClass] = useState(X_CLASS);
+  const [ticTacPlayer, setTicTacPlayer] = useState("p1");
+
+  const p1Name = decodeURI(
+    window.location.pathname.split(`${ROOT_URL}/`).pop()?.split("_")[0] || ""
+  );
+  const p2Name = decodeURI(
+    window.location.pathname.split(`${ROOT_URL}/`).pop()?.split("_")[1] || ""
+  );
 
   const handleClose = useCallback(() => {
-    onClose?.(tictacClassRef.current);
-  }, [onClose]);
+    onClose?.(ticTacClass, ticTacPlayer as Player);
+  }, [onClose, ticTacClass, ticTacPlayer]);
 
   useEffect(() => {
-    const tictacShuffle = Math.floor(Math.random() * 2);
-    tictacClassRef.current = tictacShuffle ? X_CLASS : CIRCLE_CLASS;
-  }, []);
+    const tictacShuffle = Math.random();
+    const playerShuffle = Math.random();
+    setTicTacClass(tictacShuffle > 0.5 ? X_CLASS : CIRCLE_CLASS);
+    setTicTacPlayer(playerShuffle > 0.5 ? "p1" : "p2");
+  }, [isOpen]);
 
   return (
     <Modal
@@ -121,13 +126,28 @@ const ShuffleClass: FC<Props> = ({ isOpen, onClose }) => {
       onClose={handleClose}
       shouldCloseOnOverlayClick={false}
     >
-      <ShuffleTitle>You are</ShuffleTitle>
-      {tictacClassRef.current === X_CLASS ? (
+      <ShuffleTitle>Next Turn: Shuffle!</ShuffleTitle>
+
+      {ticTacPlayer === "p1" ? (
+        <TicTacContainerX>
+          <TicTacX>{p1Name}</TicTacX>
+          <TicTacO>{p2Name}</TicTacO>
+        </TicTacContainerX>
+      ) : ticTacPlayer === "p2" ? (
+        <TicTacContainerO>
+          <TicTacX>{p1Name}</TicTacX>
+          <TicTacO>{p2Name}</TicTacO>
+        </TicTacContainerO>
+      ) : (
+        <></>
+      )}
+
+      {ticTacClass === X_CLASS ? (
         <TicTacContainerX>
           <TicTacX>X</TicTacX>
           <TicTacO>O</TicTacO>
         </TicTacContainerX>
-      ) : tictacClassRef.current === CIRCLE_CLASS ? (
+      ) : ticTacClass === CIRCLE_CLASS ? (
         <TicTacContainerO>
           <TicTacX>X</TicTacX>
           <TicTacO>O</TicTacO>
