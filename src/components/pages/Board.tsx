@@ -5,6 +5,7 @@ import {
   RefObject,
   useCallback,
   useEffect,
+  useMemo,
   useRef,
   useState,
 } from "react";
@@ -16,23 +17,24 @@ import ShuffleClass from "../modal/ShuffleClass";
 import { useGame } from "../provider/GameProvider";
 import { StyledBoard } from "../styled/StyledBoard";
 import { StyledCell } from "../styled/StyledCell";
-import { GameAction, GameState } from "../types/types";
+import { GameAction, GameState, Player } from "../types/types";
 import { getNames } from "./Game";
 
 export const X_CLASS = "cross";
 export const CIRCLE_CLASS = "circle";
+const defaultPlayerClass = {
+  p1: X_CLASS,
+  p2: CIRCLE_CLASS,
+};
 
 const Board: FC = () => {
   const [state, dispatch] = useGame();
+  const { currentPlayer, gameMatch } = state as GameState;
 
-  const [playerClass, setPlayerClass] = useState({
-    p1: X_CLASS,
-    p2: CIRCLE_CLASS,
-  });
-
+  const [playerClass, setPlayerClass] =
+    useState<Record<string, string>>(defaultPlayerClass);
   const [moves, setMoves] = useState<Record<string, string>[]>([]);
   const [hoverClass, setHoverClass] = useState(X_CLASS);
-  const { currentPlayer, gameMatch } = state as GameState;
   const [showShuffle, setShowShuffle] = useState(false);
   const [isEndMatchModalOpen, setIsEndMatchModalOpen] = useState(false);
   const [isEndGameModalOpen, setIsEndGameModalOpen] = useState(false);
@@ -41,6 +43,13 @@ const Board: FC = () => {
   const isVSComputer = !window.location.pathname.split("_")[1];
   const cellArrRef: RefObject<Array<HTMLDivElement>> = useRef([]);
   const boardRef: RefObject<HTMLDivElement> = useRef(null);
+
+  const startGame = useCallback(() => {
+    (dispatch as Dispatch<GameAction>)({ type: "RESET_MATCH" });
+    setHoverClass(X_CLASS);
+    setPlayerClass(defaultPlayerClass);
+    setMoves([]);
+  }, [dispatch]);
 
   const handleModalClose = () => {
     startGame();
@@ -85,49 +94,30 @@ const Board: FC = () => {
   const bestSpot = useCallback(() => {
     const timeout = setTimeout(() => {
       if (cellArrRef && !isEndGameModalOpen && !isEndMatchModalOpen) {
-        minimax(cellArrRef, currentPlayer, cellArrRef.current).index!.click();
+        console.log(
+          minimax({
+            currentBoard: moves[moves.length - 1],
+            player: currentPlayer,
+            playerClass,
+          })
+        );
+
         clearCells();
       }
       clearTimeout(timeout);
     });
-  }, [currentPlayer, isEndGameModalOpen, isEndMatchModalOpen]);
+  }, [
+    currentPlayer,
+    isEndGameModalOpen,
+    isEndMatchModalOpen,
+    moves,
+    playerClass,
+  ]);
 
-  /* End AI Functions */
-
-  // const setHoverClass = useCallback((currentClass: string) => {
-  //   const gameBoard = boardRef.current;
-  //   console.log(currentClass, "setHoverClass");
-  //   if (gameBoard) {
-  //     gameBoard.classList.remove(X_CLASS);
-  //     gameBoard.classList.remove(CIRCLE_CLASS);
-  //     if (currentClass === CIRCLE_CLASS) {
-  //       gameBoard.classList.add(X_CLASS);
-  //     } else {
-  //       gameBoard.classList.add(CIRCLE_CLASS);
-  //     }
-  //   }
-  // }, []);
-
-  // const placeMark = useCallback(
-  //   (cell: HTMLDivElement, currentClass: string, currentContent: string) => {
-  //     cell.classList.add(currentClass);
-  //     cell.innerHTML = currentContent;
-  //   },
-  //   []
-  // );
-
-  const isDraw = () => {
-    const cellElements = cellArrRef.current;
-
-    if (cellElements) {
-      return [...(cellElements as Array<HTMLDivElement>)].every((cell) => {
-        return (
-          cell.classList.contains(X_CLASS) ||
-          cell.classList.contains(CIRCLE_CLASS)
-        );
-      });
-    }
-  };
+  const isDraw = useMemo(
+    () => !!moves.length && Object.keys(moves[moves.length - 1]).length >= 9,
+    [moves]
+  );
 
   const showResult = useCallback(
     (draw: boolean) => {
@@ -147,45 +137,39 @@ const Board: FC = () => {
   const handleCellClick = useCallback(
     (i: number) => (e: any) => {
       try {
-        // const cell = e.target;
-
-        // Don't do anything if cell has contents
-        // if (
-        //   cell.classList.contains(X_CLASS) ||
-        //   cell.classList.contains(CIRCLE_CLASS)
-        // ) {
-        //   return;
-        // }
-        if (!!(moves[moves.length - 1] ?? [])[i]) {
+        if (!!moves.length && (moves[moves.length - 1] ?? [])[i]) {
           return;
         }
 
-        let currentClass = playerClass[currentPlayer];
-        setMoves([...moves, { ...moves[moves.length - 1], [i]: currentClass }]);
+        const currentClass = playerClass[currentPlayer];
+        const currentBoard = {
+          ...(moves[moves.length - 1] ?? []),
+          [i]: currentClass,
+        };
+
+        setMoves([...moves, currentBoard]);
 
         const pause = setTimeout(() => {
           clearTimeout(pause);
         }, 100);
 
-        if (checkWin(currentPlayer, undefined, cellArrRef.current)) {
+        if (checkWin(currentPlayer, currentBoard, playerClass)) {
           showResult(false);
-        } else if (isDraw()) {
+        } else if (!!isDraw) {
           showResult(true);
         } else {
-          (dispatch as Dispatch<GameAction>)({
-            type: "SET_CURRENT_PLAYER",
-            payload: currentPlayer === "p1" ? "p2" : "p1",
-          });
           // swap turns
-          if (currentPlayer === "p2") {
+          if (!!(moves.length % 2)) {
             const shuffleTimeout = setTimeout(() => {
               setShowShuffle(true);
               clearTimeout(shuffleTimeout);
             }, 1000);
             return;
           }
-
-          setHoverClass(currentClass);
+          (dispatch as Dispatch<GameAction>)({
+            type: "SET_CURRENT_PLAYER",
+            payload: currentPlayer === "p1" ? "p2" : "p1",
+          });
         }
 
         if (isVSComputer && currentPlayer === "p1") {
@@ -196,6 +180,7 @@ const Board: FC = () => {
       }
     },
     [
+      isDraw,
       playerClass,
       bestSpot,
       currentPlayer,
@@ -206,31 +191,28 @@ const Board: FC = () => {
     ]
   );
 
-  const startGame = useCallback(() => {
-    (dispatch as Dispatch<GameAction>)({ type: "RESET_MATCH" });
-    const cellElements = cellArrRef.current;
-
-    if (cellElements) {
-      cellElements.forEach((cell) => {
-        cell.classList.remove(X_CLASS);
-        cell.classList.remove(CIRCLE_CLASS);
-        cell.innerHTML = "";
+  const handleAcceptShuffle = useCallback(
+    (shuffledClass: string, shuffledPlayer: string) => {
+      setShowShuffle(false);
+      setPlayerClass({
+        [shuffledPlayer]: shuffledClass,
+        [shuffledPlayer === "p1" ? "p2" : "p1"]:
+          shuffledClass === X_CLASS ? CIRCLE_CLASS : X_CLASS,
       });
-    }
-    setHoverClass(CIRCLE_CLASS);
-  }, [dispatch]);
 
-  const handleAcceptShuffle = useCallback((shuffledClass: string) => {
-    setShowShuffle(false);
-    setPlayerClass({
-      p1: shuffledClass,
-      p2: shuffledClass === X_CLASS ? X_CLASS : CIRCLE_CLASS,
-    });
+      (dispatch as Dispatch<GameAction>)({
+        type: "SET_CURRENT_PLAYER",
+        payload: shuffledPlayer as Player,
+      });
 
-    setHoverClass(shuffledClass);
-  }, []);
+      setHoverClass(shuffledClass);
+    },
+    [dispatch]
+  );
 
-  console.log(JSON.stringify(moves));
+  useEffect(() => {
+    setHoverClass(playerClass[currentPlayer]);
+  }, [currentPlayer, playerClass]);
 
   useEffect(() => {
     startGame();
