@@ -1,67 +1,55 @@
-import { RefObject } from "react";
 import { winningCombinations } from "../../schema";
-import { CIRCLE_CLASS, X_CLASS } from "../pages/Board";
 import { Player } from "../types/types";
 
-export const emptySquares = (
-  cellArr?: RefObject<Array<HTMLDivElement>>,
-  cellValue?: Array<HTMLDivElement>
-) => {
-  const cells = !!cellArr ? cellArr.current : cellValue;
-
-  return cells!.filter(
-    (cell: HTMLDivElement) =>
-      !cell.classList.contains(X_CLASS) &&
-      !cell.classList.contains(CIRCLE_CLASS) &&
-      cell.innerHTML === ""
-  );
+export const emptySquares = (currentBoard: Record<string, string>) => {
+  if (!!currentBoard) {
+    const emptyCells = [];
+    for (let i = 0; i < 10; i += 1) {
+      if (!currentBoard[i]) {
+        emptyCells.push(i);
+      }
+    }
+    return emptyCells;
+  }
+  return [0, 1, 2, 3, 4, 5, 6, 7, 8];
 };
 
 export const checkWin = (
   player: Player,
-  cellArr?: Array<HTMLDivElement>,
-  cellValue?: any
+  currentBoard: Record<string, string>,
+  playerClass: Record<string, string>
 ) => {
-  const cellElements = cellArr || cellValue;
-  const playChar = player === "p1" ? " " : "  ";
-
-  if (cellElements) {
-    return winningCombinations.some((combination) => {
-      return combination.every((index) => {
-        return cellElements[index].innerHTML === playChar;
+  if (!!currentBoard) {
+    if (Object.keys(currentBoard).length >= 3) {
+      return winningCombinations.some((combination) => {
+        return combination.every((index) => {
+          return currentBoard[index] === playerClass[player];
+        });
       });
-    });
+    }
   }
 };
 
-export const minimax = (
-  newCellArr: RefObject<Array<HTMLDivElement>>,
-  player: Player,
-  cellValue?: any
-) => {
-  const newCArr = newCellArr.current as Array<HTMLDivElement>;
-  let availSpots = emptySquares(undefined, cellValue);
+export const minimax = ({ currentBoard, player, playerClass }: any) => {
+  let availSpots = emptySquares(currentBoard);
+  let newCArr = { ...currentBoard };
 
-  if (checkWin("p1", newCArr, cellValue)) {
+  if (checkWin("p1", currentBoard, playerClass)) {
     return { score: -10 };
-  } else if (checkWin("p2", newCArr, cellValue)) {
+  } else if (checkWin("p2", currentBoard, playerClass)) {
     return { score: 10 };
   } else if (availSpots.length === 0) {
     return { score: 0 };
   }
 
   let moves = [];
+
   for (let i = 0; i < availSpots.length; i += 1) {
     let move: any = {};
-    newCArr[availSpots[i].id as any].innerHTML = player === "p1" ? " " : "  ";
+    newCArr[availSpots[i]] = playerClass[player];
 
-    if (player === "p2") {
-      let result = minimax(newCellArr, "p1", cellValue);
-      move.score = result.score;
-    } else {
-      let result = minimax(newCellArr, "p2", cellValue);
-      move.score = result.score;
-    }
+    let result = minimax({ currentBoard: newCArr, player, playerClass });
+    move.score = result.score;
 
     moves.push(move);
   }
@@ -85,8 +73,9 @@ export const minimax = (
     }
   }
 
+  console.log(newCArr, availSpots, bestMove, availSpots[bestMove]);
   return {
-    index: newCArr[Number(availSpots[bestMove].id)],
+    index: newCArr[availSpots[bestMove]],
     score: moves[bestMove].score,
   };
 };
