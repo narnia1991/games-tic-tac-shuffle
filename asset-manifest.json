@@ -1,10 +1,10 @@
 {
   "files": {
-    "main.js": "/games/tic-tac-shuffle/static/js/main.39ecd94a.js",
-    "index.html": "/games/tic-tac-shuffle/index.html",
-    "main.39ecd94a.js.map": "/games/tic-tac-shuffle/static/js/main.39ecd94a.js.map"
+    "main.js": "/games-tic-tac-shuffle/static/js/main.7bc69f30.js",
+    "index.html": "/games-tic-tac-shuffle/index.html",
+    "main.7bc69f30.js.map": "/games-tic-tac-shuffle/static/js/main.7bc69f30.js.map"
   },
   "entrypoints": [
-    "static/js/main.39ecd94a.js"
+    "static/js/main.7bc69f30.js"
   ]
 }
