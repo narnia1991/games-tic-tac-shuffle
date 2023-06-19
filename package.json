@@ -2,7 +2,7 @@
   "name": "tic-tac-shuffle",
   "version": "0.1.0",
   "private": true,
-  "homepage": "https://narnia1991.github.io/games/tic-tac-shuffle",
+  "homepage": "https://narnia1991.github.io/games-tic-tac-shuffle",
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
