@@ -35,7 +35,7 @@ type Props = {
 };
 
 const EndGameModal: FC<Props> = ({ isOpen, onClose }) => {
-  const gameCollectionRef = collection(db, "tictactoe");
+  // const gameCollectionRef = collection(db, "tictactoe");
 
   const [header, setHeader] = useState("");
   const [state] = useGame();
@@ -62,12 +62,12 @@ const EndGameModal: FC<Props> = ({ isOpen, onClose }) => {
           return;
       }
 
-      await addDoc(gameCollectionRef, {
-        date: format(new Date(), "yyyy-MM-dd hh:mm:ss"),
-        name: `${p1.name} vs. ${p2.name}`,
-        score: `${p1.score} - ${p2.score}`,
-        winner,
-      });
+      // await addDoc(gameCollectionRef, {
+      //   date: format(new Date(), "yyyy-MM-dd hh:mm:ss"),
+      //   name: `${p1.name} vs. ${p2.name}`,
+      //   score: `${p1.score} - ${p2.score}`,
+      //   winner,
+      // });
       onClose();
     } catch (err) {
       //noop
