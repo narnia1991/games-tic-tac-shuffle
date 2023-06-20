@@ -9,7 +9,6 @@ const App = () => {
 
   if (pathname === "/") {
     window.location.href = ROOT_URL;
-
     return <></>;
   }
 
