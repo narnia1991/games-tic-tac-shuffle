@@ -51,7 +51,7 @@ const Entry = styled.div`
 `;
 
 const Landing: FC = () => {
-  const gameCollectionRef = collection(db, "tictactoe");
+  // const gameCollectionRef = collection(db, "tictactoe");
 
   const [mode, setMode] = useState("");
   const [gameList, setGameList] = useState<any>([]);
@@ -77,12 +77,13 @@ const Landing: FC = () => {
   );
 
   const loadGames = useCallback(async () => {
-    const data = await getDocs(
-      query(gameCollectionRef, orderBy("date", "desc"))
-    );
+    // const data = await getDocs(
+    //   query(gameCollectionRef, orderBy("date", "desc"))
+    // );
 
+    const data = { docs: [{ data: () => {}, id: "" }] };
     setGameList(
-      data.docs.map((entry) =>
+      data.docs?.map((entry) =>
         dataToGameList(entry.data(), entry.id)
       ) as Array<any>
     );
