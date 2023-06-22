@@ -5,7 +5,7 @@ export const dataToGameList = (
   id: string
 ) => ({
   id,
-  date: format(new Date(date), "yyyy-MM-dd hh:mm:ss"),
+  date: format(new Date(date ?? ""), "yyyy-MM-dd hh:mm:ss"),
   name,
   score,
   winner,
