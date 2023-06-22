@@ -103,10 +103,12 @@ const ShuffleClass: FC<Props> = ({ isOpen, onClose }) => {
   const [ticTacPlayer, setTicTacPlayer] = useState("p1");
 
   const p1Name = decodeURI(
-    window.location.pathname.split(`${ROOT_URL}/`).pop()?.split("_")[0] || ""
+    window.location.pathname.split(`${ROOT_URL}/`).pop()?.split("_")[0] ||
+      "Player 1"
   );
   const p2Name = decodeURI(
-    window.location.pathname.split(`${ROOT_URL}/`).pop()?.split("_")[1] || ""
+    window.location.pathname.split(`${ROOT_URL}/`).pop()?.split("_")[1] ||
+      "Computer"
   );
 
   const handleClose = useCallback(() => {

@@ -80,13 +80,12 @@ const Landing: FC = () => {
     // const data = await getDocs(
     //   query(gameCollectionRef, orderBy("date", "desc"))
     // );
-
-    const data = { docs: [{ data: () => {}, id: "" }] };
-    setGameList(
-      data.docs?.map((entry) =>
-        dataToGameList(entry.data(), entry.id)
-      ) as Array<any>
-    );
+    // const data = { docs: [{ data: () => {}, id: "" }] };
+    // setGameList(
+    //   data.docs?.map((entry) =>
+    //     !!entry ? dataToGameList(entry.data(), entry.id) : {}
+    //   ) as Array<any>
+    // );
   }, [getDocs, dataToGameList]);
 
   useEffect(() => {

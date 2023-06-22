@@ -80,42 +80,8 @@ const Board: FC = () => {
 
   /* Start AI Functions */
 
-  const clearCells = () => {
-    cellArrRef.current?.forEach((cell) => {
-      if (
-        !cell.classList.contains(X_CLASS) &&
-        !cell.classList.contains(CIRCLE_CLASS)
-      ) {
-        cell.innerHTML = "";
-      }
-    });
-  };
-
-  const bestSpot = useCallback(() => {
-    const timeout = setTimeout(() => {
-      if (cellArrRef && !isEndGameModalOpen && !isEndMatchModalOpen) {
-        console.log(
-          minimax({
-            currentBoard: moves[moves.length - 1],
-            player: currentPlayer,
-            playerClass,
-          })
-        );
-
-        clearCells();
-      }
-      clearTimeout(timeout);
-    });
-  }, [
-    currentPlayer,
-    isEndGameModalOpen,
-    isEndMatchModalOpen,
-    moves,
-    playerClass,
-  ]);
-
   const isDraw = useMemo(
-    () => !!moves.length && Object.keys(moves[moves.length - 1]).length >= 9,
+    () => !!moves.length && Object.keys([...moves].pop() ?? {}).length >= 9,
     [moves]
   );
 
@@ -135,7 +101,7 @@ const Board: FC = () => {
   );
 
   const handleCellClick = useCallback(
-    (i: number) => (e: any) => {
+    (i: number) => () => {
       try {
         if (!!moves.length && (moves[moves.length - 1] ?? [])[i]) {
           return;
@@ -155,25 +121,18 @@ const Board: FC = () => {
 
         if (checkWin(currentPlayer, currentBoard, playerClass)) {
           showResult(false);
-        } else if (!!isDraw) {
+        } else if (moves.length === 8) {
           showResult(true);
         } else {
           // swap turns
           if (!!(moves.length % 2)) {
-            const shuffleTimeout = setTimeout(() => {
-              setShowShuffle(true);
-              clearTimeout(shuffleTimeout);
-            }, 1000);
+            setShowShuffle(true);
             return;
           }
           (dispatch as Dispatch<GameAction>)({
             type: "SET_CURRENT_PLAYER",
             payload: currentPlayer === "p1" ? "p2" : "p1",
           });
-        }
-
-        if (isVSComputer && currentPlayer === "p1") {
-          bestSpot();
         }
       } catch (err) {
         console.log(err);
@@ -182,7 +141,6 @@ const Board: FC = () => {
     [
       isDraw,
       playerClass,
-      bestSpot,
       currentPlayer,
       dispatch,
       isVSComputer,
@@ -190,6 +148,18 @@ const Board: FC = () => {
       moves,
     ]
   );
+
+  const bestSpot = useCallback(() => {
+    if (!isEndGameModalOpen && !isEndMatchModalOpen) {
+      const { index } = minimax({
+        currentBoard: [...moves].pop(),
+        player: "p1",
+        playerClass,
+      });
+
+      handleCellClick(index as number)();
+    }
+  }, [isEndGameModalOpen, isEndMatchModalOpen, moves, playerClass, dispatch]);
 
   const handleAcceptShuffle = useCallback(
     (shuffledClass: string, shuffledPlayer: string) => {
@@ -213,6 +183,12 @@ const Board: FC = () => {
   useEffect(() => {
     setHoverClass(playerClass[currentPlayer]);
   }, [currentPlayer, playerClass]);
+
+  useEffect(() => {
+    if (isVSComputer && currentPlayer === "p2" && !showShuffle) {
+      bestSpot();
+    }
+  }, [bestSpot, isVSComputer, currentPlayer]);
 
   useEffect(() => {
     startGame();
