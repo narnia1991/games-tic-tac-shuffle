@@ -1,26 +1,27 @@
 import Game from "./components/pages/Game";
 import Landing from "./components/pages/Landing";
 import GameProvider from "./components/provider/GameProvider";
+import { Routes, Route } from "react-router-dom";
+import { FC } from "react";
 
 export const ROOT_URL = "/games-tic-tac-shuffle";
 
-const App = () => {
+const App: FC = () => {
   const pathname = window.location.pathname;
-
-  if (pathname === "/") {
-    window.location.href = ROOT_URL;
-    return <></>;
-  }
 
   return (
     <div className="App">
-      {pathname === ROOT_URL ? (
-        <Landing />
-      ) : (
-        <GameProvider>
-          <Game />
-        </GameProvider>
-      )}
+      <Routes>
+        <Route path={ROOT_URL} element={<Landing />}></Route>
+        <Route
+          path={`${ROOT_URL}/:gameId`}
+          element={
+            <GameProvider>
+              <Game />
+            </GameProvider>
+          }
+        ></Route>
+      </Routes>
     </div>
   );
 };

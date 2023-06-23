@@ -1,4 +1,6 @@
-# Tic Tac Toe
+# Tic Tac Shuffle
+
+This was one of my job application coding challenge but I made a little twist to the ~boring~ classic game of Tic Tac Toe. You can't rely on your memorized moves anymore.
 
 ## Story:
 
