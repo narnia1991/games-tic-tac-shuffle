@@ -1,5 +1,6 @@
 import styled from "@emotion/styled";
 import { FC, RefObject, useCallback, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import { ROOT_URL } from "../../App";
 import { fallBackFont, textPrimary } from "../../variables";
 import Button from "../common/Button";
@@ -45,6 +46,8 @@ const StartGameModal: FC<Props> = ({ isOpen, onClose, isTwoPlayer }) => {
     onClose();
   }, [onClose]);
 
+  const navigate = useNavigate();
+
   const p1Ref: RefObject<HTMLInputElement> = useRef(null);
   const p2Ref: RefObject<HTMLInputElement> = useRef(null);
 
@@ -60,12 +63,12 @@ const StartGameModal: FC<Props> = ({ isOpen, onClose, isTwoPlayer }) => {
 
     if (!!player2?.value) {
       const p2Name = player2.value;
-      window.location.href = `${ROOT_URL}/${p1Name}_${p2Name}`;
+      navigate(`${ROOT_URL}/${p1Name}_${p2Name}`);
       onClose();
       return;
     }
 
-    window.location.href = `${ROOT_URL}/${p1Name}`;
+    navigate(`${ROOT_URL}/${p1Name}`);
     onClose();
   }, [onClose, isTwoPlayer]);
 
