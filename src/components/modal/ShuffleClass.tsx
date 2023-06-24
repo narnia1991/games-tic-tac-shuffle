@@ -8,6 +8,7 @@ import Modal from "../common/Modal";
 import { CIRCLE_CLASS, X_CLASS } from "../pages/Board";
 import { Player } from "../types/types";
 import { ROOT_URL } from "../../App";
+import { useLocation } from "react-router-dom";
 
 const spinX = keyframes`
   0%{
@@ -101,14 +102,13 @@ type Props = {
 const ShuffleClass: FC<Props> = ({ isOpen, onClose }) => {
   const [ticTacClass, setTicTacClass] = useState(X_CLASS);
   const [ticTacPlayer, setTicTacPlayer] = useState("p1");
+  const location = useLocation();
 
   const p1Name = decodeURI(
-    window.location.pathname.split(`${ROOT_URL}/`).pop()?.split("_")[0] ||
-      "Player 1"
+    location.pathname.split(`${ROOT_URL}/`).pop()?.split("_")[0] || "Player 1"
   );
   const p2Name = decodeURI(
-    window.location.pathname.split(`${ROOT_URL}/`).pop()?.split("_")[1] ||
-      "Computer"
+    location.pathname.split(`${ROOT_URL}/`).pop()?.split("_")[1] || "Computer"
   );
 
   const handleClose = useCallback(() => {

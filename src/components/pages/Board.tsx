@@ -9,6 +9,7 @@ import {
   useRef,
   useState,
 } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import { ROOT_URL } from "../../App";
 import { checkWin, minimax } from "../helpers/minimax";
 import EndGameModal from "../modal/EndGameModal";
@@ -44,6 +45,9 @@ const Board: FC = () => {
   const cellArrRef: RefObject<Array<HTMLDivElement>> = useRef([]);
   const boardRef: RefObject<HTMLDivElement> = useRef(null);
 
+  const navigate = useNavigate();
+  const location = useLocation();
+
   const startGame = useCallback(() => {
     (dispatch as Dispatch<GameAction>)({ type: "RESET_MATCH" });
     setHoverClass(X_CLASS);
@@ -62,10 +66,10 @@ const Board: FC = () => {
 
   const handleEndGameModalClose = () => {
     (dispatch as Dispatch<GameAction>)({ type: "RESET_GAME" });
-    getNames(dispatch as Dispatch<GameAction>);
+    getNames(location, dispatch as Dispatch<GameAction>);
     setIsEndGameModalOpen(false);
     startGame();
-    window.location.href = ROOT_URL;
+    navigate(ROOT_URL);
   };
 
   const createCellRefs = useCallback(

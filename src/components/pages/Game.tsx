@@ -10,6 +10,7 @@ import {
 import { useGame } from "../provider/GameProvider";
 import { GameAction, GameState } from "../types/types";
 import { ROOT_URL } from "../../App";
+import { useLocation } from "react-router-dom";
 
 /*
   TODO:
@@ -21,11 +22,11 @@ import { ROOT_URL } from "../../App";
   Match Results Modal
 */
 
-export const getNames = (dispatch: Dispatch<GameAction>) => {
+export const getNames = (location: any, dispatch: Dispatch<GameAction>) => {
   const p1Name =
-    window.location.pathname.split(`${ROOT_URL}/`).pop()?.split("_")[0] || "";
+    location.pathname.split(`${ROOT_URL}/`).pop()?.split("_")[0] || "";
   const p2Name =
-    window.location.pathname.split(`${ROOT_URL}/`).pop()?.split("_")[1] || "";
+    location.pathname.split(`${ROOT_URL}/`).pop()?.split("_")[1] || "";
 
   dispatch({
     type: "SET_PLAYER_NAMES",
@@ -37,13 +38,14 @@ export const getNames = (dispatch: Dispatch<GameAction>) => {
 };
 
 const Game: FC = () => {
+  const location = useLocation();
   const [state, dispatch] = useGame();
   const { gameMatch, currentPlayer } = state as GameState;
   const { p1, p2 } = gameMatch;
 
   useEffect(() => {
-    getNames(dispatch as Dispatch<GameAction>);
-  }, [dispatch]);
+    getNames(location, dispatch as Dispatch<GameAction>);
+  }, [dispatch, location, getNames]);
 
   return (
     <Container>
