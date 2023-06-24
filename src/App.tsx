@@ -7,8 +7,6 @@ import { FC } from "react";
 export const ROOT_URL = "/games-tic-tac-shuffle";
 
 const App: FC = () => {
-  const pathname = window.location.pathname;
-
   return (
     <div className="App">
       <Routes>
