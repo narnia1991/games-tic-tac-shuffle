@@ -5,9 +5,9 @@ import Checkbox from "../common/Checkbox";
 import Button from "../common/Button";
 import StartGameModal from "../modal/StartGameModal";
 import { Container } from "../styled/Container";
-import { collection, getDocs, orderBy, query } from "firebase/firestore";
 import { db } from "../../firebase";
 import { dataToGameList } from "../helpers/parse";
+import { ref, set } from "firebase/database";
 
 const StartContainer = styled(Container)`
   height: auto;
@@ -50,8 +50,17 @@ const Entry = styled.div`
   padding: 1rem;
 `;
 
-const Landing: FC = () => {
-  // const gameCollectionRef = collection(db, "tictactoe");
+const Landing: FC<{ userId: string }> = ({ userId }) => {
+  // const writeSession = (sessionId: string, p1Id: string, p2Id: string) => {
+  //   const sessionRef = ref(db, "/sessions" + sessionId);
+
+  //   set(sessionRef, {
+  //     p1Id,
+  //     p2Id,
+  //   });
+  // };
+
+  // writeSession("session", "player1", "player2");
 
   const [mode, setMode] = useState("");
   const [gameList, setGameList] = useState<any>([]);
@@ -76,21 +85,21 @@ const Landing: FC = () => {
     []
   );
 
-  const loadGames = useCallback(async () => {
-    // const data = await getDocs(
-    //   query(gameCollectionRef, orderBy("date", "desc"))
-    // );
-    // const data = { docs: [{ data: () => {}, id: "" }] };
-    // setGameList(
-    //   data.docs?.map((entry) =>
-    //     !!entry ? dataToGameList(entry.data(), entry.id) : {}
-    //   ) as Array<any>
-    // );
-  }, [getDocs, dataToGameList]);
+  // const loadGames = useCallback(async () => {
+  //   // const data = await getDocs(
+  //   //   query(gameCollectionRef, orderBy("date", "desc"))
+  //   // );
+  //   // const data = { docs: [{ data: () => {}, id: "" }] };
+  //   // setGameList(
+  //   //   data.docs?.map((entry) =>
+  //   //     !!entry ? dataToGameList(entry.data(), entry.id) : {}
+  //   //   ) as Array<any>
+  //   // );
+  // }, [getDocs, dataToGameList]);
 
   useEffect(() => {
     setMode("PVP");
-    loadGames();
+    // loadGames();
   }, []);
 
   return (
