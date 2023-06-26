@@ -9,6 +9,7 @@ const StyledInput = styled.input`
 type Props = {
   name: string;
   forwardRef: RefObject<HTMLInputElement>;
+  type?: string;
 };
 
 const Input: FC<Props> = ({ name, forwardRef, ...props }) => {

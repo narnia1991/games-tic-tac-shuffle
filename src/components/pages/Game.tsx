@@ -10,7 +10,9 @@ import {
 import { useGame } from "../provider/GameProvider";
 import { GameAction, GameState } from "../types/types";
 import { ROOT_URL } from "../../App";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
+import { onValue, ref } from "firebase/database";
+import { db } from "../../firebase";
 
 /*
   TODO:
@@ -38,13 +40,32 @@ export const getNames = (location: any, dispatch: Dispatch<GameAction>) => {
 };
 
 const Game: FC = () => {
+  const userId = localStorage.getItem("userId");
   const location = useLocation();
+  const navigate = useNavigate();
   const [state, dispatch] = useGame();
   const { gameMatch, currentPlayer } = state as GameState;
   const { p1, p2 } = gameMatch;
 
   useEffect(() => {
     getNames(location, dispatch as Dispatch<GameAction>);
+
+    const sessionId =
+      location.pathname.split(`${ROOT_URL}/`).pop()?.split("_")[0] || "";
+
+    if (!sessionId) {
+      navigate(-1);
+    }
+
+    const sessionRef = ref(db, sessionId);
+
+    onValue(sessionRef, (snap) => {
+      console.log(sessionId, snap.val(), userId);
+      const data = snap.val();
+      if (data?.length) {
+        console.log(data);
+      }
+    });
   }, [dispatch, location, getNames]);
 
   return (
