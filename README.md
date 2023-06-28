@@ -17,24 +17,30 @@ two-player game but allow an option to compete with a bot.
 - Impose proper coding styles and component composition
 - Having an API to interface with your database is a plus.
 
-## TODO
+### Tech Used
+- Typescript
+- ReactJS
+- Firebase realtime database
+- Github Pages
+- Styled Components
+- React Router v6
 
-- Single Player
-- VS AI
-- Storage for Player names, date of match, score and who won.
+## TODO
+- Realtime play
+  - Save on turn click
+  - Disable if not your turn
+- Save Shuffle on Firebase
+- Current Game History
+  - Request Undo
+- Timer
+- Mobile Responsive
+- Overall History
+  - Game Replay
 
 ## Screens
 
 - - Main Screen
 - - Game Screen
-
-### Good to have:
-
-- - Undo Button
-- - Difficulty settings
-- - History of each match
-- - Timer
-- - Different device players realtime
 
 ## Notes
 
