@@ -9,7 +9,7 @@ import {
   useRef,
   useState,
 } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { ROOT_URL } from "../../App";
 import { checkWin, minimax } from "../helpers/minimax";
 import EndGameModal from "../modal/EndGameModal";
@@ -19,7 +19,6 @@ import { useGame } from "../provider/GameProvider";
 import { StyledBoard } from "../styled/StyledBoard";
 import { StyledCell } from "../styled/StyledCell";
 import { GameAction, GameState, Player } from "../types/types";
-import { getNames } from "./Game";
 
 export const X_CLASS = "cross";
 export const CIRCLE_CLASS = "circle";
@@ -31,6 +30,7 @@ const defaultPlayerClass = {
 const Board: FC = () => {
   const [state, dispatch] = useGame();
   const { currentPlayer, gameMatch } = state as GameState;
+  const { p1, p2 } = gameMatch;
 
   const [playerClass, setPlayerClass] =
     useState<Record<string, string>>(defaultPlayerClass);
@@ -46,7 +46,6 @@ const Board: FC = () => {
   const boardRef: RefObject<HTMLDivElement> = useRef(null);
 
   const navigate = useNavigate();
-  const location = useLocation();
 
   const startGame = useCallback(() => {
     (dispatch as Dispatch<GameAction>)({ type: "RESET_MATCH" });
@@ -64,13 +63,14 @@ const Board: FC = () => {
     setIsEndGameModalOpen(true);
   }, []);
 
-  const handleEndGameModalClose = () => {
+  const handleEndGameModalClose = useCallback(() => {
     (dispatch as Dispatch<GameAction>)({ type: "RESET_GAME" });
-    getNames(location, dispatch as Dispatch<GameAction>);
+    // getNames(location, dispatch as Dispatch<GameAction>);
     setIsEndGameModalOpen(false);
     startGame();
+
     navigate(ROOT_URL);
-  };
+  }, [dispatch, startGame, navigate]);
 
   const createCellRefs = useCallback(
     (cellArr: RefObject<Array<HTMLDivElement>>, index: number) =>
@@ -199,7 +199,7 @@ const Board: FC = () => {
   }, [startGame]);
 
   return (
-    <StyledBoard className={`board ${hoverClass}`} ref={boardRef}>
+    <StyledBoard className={`board ${hoverClass} `} ref={boardRef}>
       <EndMatchModal
         gameMatch={gameMatch}
         header={result}
@@ -216,7 +216,9 @@ const Board: FC = () => {
       {
         Array.from(Array(9)).map((_, i) => (
           <StyledCell
-            className={`${(moves[moves.length - 1] ?? [])[i] ?? ""}`}
+            className={`${(moves[moves.length - 1] ?? [])[i] ?? ""} ${
+              (!p2.name || !p1.name) && "disabled"
+            }`}
             ref={createCellRefs(cellArrRef, i)}
             key={`${i}`}
             id={`${i}`}

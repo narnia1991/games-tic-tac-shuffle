@@ -7,6 +7,7 @@ import StartGameModal from "../modal/StartGameModal";
 import { Container } from "../styled/Container";
 import { db } from "../../firebase";
 import { ref, onValue } from "firebase/database";
+import JoinInviteModal from "../modal/JoinInviteModal";
 
 const StartContainer = styled(Container)`
   height: auto;
@@ -49,11 +50,18 @@ const Entry = styled.div`
   padding: 1rem;
 `;
 
+const EmptyDiv = styled.div`
+  display: flex;
+  justify-content: center;
+  padding: 1rem;
+  width: 100%;
+`;
+
 const Landing: FC = () => {
-  const userId = localStorage.getItem("userId");
   const [mode, setMode] = useState("");
   const [gameList, setGameList] = useState<any>([]);
   const [isStartModalOpen, setIsStartModalOpen] = useState(false);
+  const [isJoinInviteModalOpen, setIsJoinInviteModalOpen] = useState(false);
 
   const loadGames = () => {
     const sessionRef = ref(db, "/sessions");
@@ -65,6 +73,14 @@ const Landing: FC = () => {
       }
     });
   };
+
+  const handleJoinInvite = useCallback(() => {
+    setIsJoinInviteModalOpen(true);
+  }, []);
+
+  const handleCloseJoinInviteModal = useCallback(() => {
+    setIsJoinInviteModalOpen(false);
+  }, []);
 
   const handleStartClick = useCallback(
     (e: MouseEvent) => {
@@ -97,9 +113,22 @@ const Landing: FC = () => {
         onClose={closeStartModal}
         isTwoPlayer={mode === "PVP"}
       />
+      <JoinInviteModal
+        isOpen={isJoinInviteModalOpen}
+        onClose={handleCloseJoinInviteModal}
+      />
       <StartContainer>
         <Button variant="filled" width="100%" onClick={handleStartClick}>
-          START GAME
+          CREATE GAME
+        </Button>
+
+        <Button
+          style={{ marginTop: "1rem" }}
+          variant="filled"
+          width="100%"
+          onClick={handleJoinInvite}
+        >
+          JOIN GAME
         </Button>
         {!!mode && (
           <ModeContainer>
@@ -137,7 +166,7 @@ const Landing: FC = () => {
               </GameEntry>
             ))
           ) : (
-            <></>
+            <EmptyDiv>No Saved Games Yet</EmptyDiv>
           )}
         </History>
       </StartContainer>

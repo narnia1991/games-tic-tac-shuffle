@@ -10,6 +10,9 @@ export const StyledBoard = styled.div`
   justify-items: center;
   align-items: center;
   grid-template-columns: repeat(3, auto);
+  &.disabled {
+    cursor: not-allowed;
+  }
   &.cross div:not(.cross):not(.circle):hover::before,
   &.cross div:not(.cross):not(.circle):hover::after,
   &.circle div:not(.cross):not(.circle):hover::before {

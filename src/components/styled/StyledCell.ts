@@ -10,6 +10,9 @@ export const StyledCell = styled.div`
   align-items: center;
   position: relative;
   cursor: pointer;
+  &.disabled {
+    cursor: not-allowed;
+  }
   &:first-of-type,
   &:nth-of-type(2),
   &:nth-of-type(3) {
