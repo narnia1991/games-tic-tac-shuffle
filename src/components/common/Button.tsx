@@ -1,4 +1,4 @@
-import { FC, MouseEventHandler, ReactNode } from "react";
+import { CSSProperties, FC, MouseEventHandler, ReactNode } from "react";
 import styled from "@emotion/styled";
 import { primary, textPrimary } from "../../variables";
 
@@ -23,6 +23,7 @@ type Props = {
   onClick?: MouseEventHandler;
   variant?: "filled" | "text";
   children: ReactNode;
+  style?: CSSProperties;
 };
 
 const Button: FC<Props> = ({ children, variant, ...props }) => {

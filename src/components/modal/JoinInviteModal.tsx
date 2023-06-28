@@ -42,80 +42,40 @@ const Label = styled.label`
 type Props = {
   isOpen: boolean;
   onClose(): void;
-  isTwoPlayer: boolean;
 };
 
-const StartGameModal: FC<Props> = ({ isOpen, onClose, isTwoPlayer }) => {
-  const userId = localStorage.getItem("userId");
-
+const JoinInviteModal: FC<Props> = ({ isOpen, onClose }) => {
   const handleCloseModal = useCallback(() => {
     onClose();
   }, [onClose]);
 
   const navigate = useNavigate();
 
-  const p1Ref: RefObject<HTMLInputElement> = useRef(null);
-  const roundCountRef: RefObject<HTMLInputElement> = useRef(null);
+  const inviteCodeRef: RefObject<HTMLInputElement> = useRef(null);
 
-  const handleCreateGame = useCallback(() => {
-    const player1 = p1Ref.current;
-    const roundCount = roundCountRef.current;
-
-    const uuid = uuidv4();
-
-    if (!player1) {
-      return;
-    }
-
-    const p1Name = player1.value;
-    const rCount = roundCount?.value ?? 1;
-
-    try {
-      const sessionRef = ref(db, uuid);
-
-      set(sessionRef, {
-        p1Id: userId,
-        p1Name,
-        rCount,
-        r1Moves: [],
-        matchType: isTwoPlayer ? "PVP" : "VSAI",
-        isGameEnded: false,
-      });
-
-      navigate(`${ROOT_URL}/${uuid}`);
-    } catch (err) {
-      console.log(err);
-    } finally {
-      onClose();
-    }
-  }, [onClose, isTwoPlayer]);
+  const handleJoinInvite = useCallback(() => {
+    const inviteCode = inviteCodeRef.current?.value;
+    navigate(`${ROOT_URL}/join/${inviteCode}`);
+  }, [onClose]);
 
   return (
     <Modal isOpen={isOpen} onClose={handleCloseModal}>
       <PlayerContainer>
         <InputContainer>
-          <Label>Nickname:</Label>
-          <Input name="player1" forwardRef={p1Ref}></Input>
-        </InputContainer>
-        <InputContainer>
-          <Label>No of Matches:</Label>
-          <Input
-            name="player2"
-            forwardRef={roundCountRef}
-            type="number"
-          ></Input>
+          <Label>Enter Invite Code:</Label>
+          <Input name="inviteCode" forwardRef={inviteCodeRef}></Input>
         </InputContainer>
       </PlayerContainer>
       <ButtonContainer>
         <Button variant="text" onClick={handleCloseModal}>
           Cancel
         </Button>
-        <Button variant="text" onClick={handleCreateGame}>
-          Create
+        <Button variant="text" onClick={handleJoinInvite}>
+          Join
         </Button>
       </ButtonContainer>
     </Modal>
   );
 };
 
-export default StartGameModal;
+export default JoinInviteModal;
