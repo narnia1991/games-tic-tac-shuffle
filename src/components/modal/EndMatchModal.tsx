@@ -25,7 +25,6 @@ const Label = styled.label`
 type Props = {
   isOpen: boolean;
   onClose(): void;
-  gameMatch: Record<string, Record<string, number | string>>;
   header: string;
   onProceed(): void;
 };

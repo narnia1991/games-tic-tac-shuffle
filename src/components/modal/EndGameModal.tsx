@@ -1,14 +1,10 @@
 import styled from "@emotion/styled";
 import { FC, useEffect, useState } from "react";
-import { addDoc, collection } from "firebase/firestore";
 
 import { fallBackFont, textPrimary } from "../../variables";
 import Button from "../common/Button";
 import Modal from "../common/Modal";
-import { useGame } from "../provider/GameProvider";
-import { GameState, PlayerScore } from "../types/types";
-import { db } from "../../firebase";
-import { format } from "date-fns";
+import { PlayerScore } from "../types/types";
 
 const Container = styled.div`
   display: flex;
@@ -31,59 +27,36 @@ const Label = styled.label`
 type Props = {
   isOpen: boolean;
   onClose(): void;
-  gameMatch: Record<string, PlayerScore>;
+  onContinue(): void;
+  gameState: any;
 };
 
-const EndGameModal: FC<Props> = ({ isOpen, onClose }) => {
-  // const gameCollectionRef = collection(db, "tictactoe");
-
+const EndGameModal: FC<Props> = ({
+  isOpen,
+  onClose,
+  gameState: { p1Name, p2Name, p1Score, p2Score },
+  onContinue,
+}) => {
   const [header, setHeader] = useState("");
-  const [state] = useGame();
-  const { p1, p2 } = (state as GameState).gameMatch;
 
   const handleCloseModal = () => {
     onClose();
   };
 
-  const handleSaveGame = async () => {
-    try {
-      let winner = "";
-      switch (true) {
-        case p1.score > p2.score:
-          winner = p1.name;
-          break;
-        case p1.score < p2.score:
-          winner = p2.name;
-          break;
-        case p1.score === p2.score:
-          winner = "Draw";
-          break;
-        default:
-          return;
-      }
-
-      // await addDoc(gameCollectionRef, {
-      //   date: format(new Date(), "yyyy-MM-dd hh:mm:ss"),
-      //   name: `${p1.name} vs. ${p2.name}`,
-      //   score: `${p1.score} - ${p2.score}`,
-      //   winner,
-      // });
-      onClose();
-    } catch (err) {
-      //noop
-    }
+  const handleContinue = async () => {
+    onContinue();
   };
 
   useEffect(() => {
     let headerText = "";
     switch (true) {
-      case p1.score > p2.score:
-        headerText = `${p1.name} Wins!`;
+      case p1Score > p2Score:
+        headerText = `${p1Name} Wins!`;
         break;
-      case p1.score < p2.score:
-        headerText = `${p2.name} Wins!`;
+      case p1Score < p2Score:
+        headerText = `${p2Name} Wins!`;
         break;
-      case p1.score === p2.score:
+      case p1Score === p2Score:
         headerText = "Draw!";
         break;
       default:
@@ -91,7 +64,7 @@ const EndGameModal: FC<Props> = ({ isOpen, onClose }) => {
     }
 
     setHeader(headerText);
-  }, [p1, p2]);
+  }, [p1Name, p2Name, p1Score, p2Score]);
 
   return (
     <Modal
@@ -103,19 +76,19 @@ const EndGameModal: FC<Props> = ({ isOpen, onClose }) => {
       <br />
       <br />
       <Label>
-        {p1.name}: {p1.score}
+        {p1Name}: {p1Score}
       </Label>
       <br />
 
       <Label>
-        {p2.name}: {p2.score}
+        {p2Name}: {p2Score}
       </Label>
       <ButtonContainer>
         <Button variant="text" onClick={handleCloseModal}>
-          Discard
+          Quit
         </Button>
-        <Button variant="text" onClick={handleSaveGame}>
-          Save
+        <Button variant="text" onClick={handleContinue}>
+          Continue
         </Button>
       </ButtonContainer>
     </Modal>
