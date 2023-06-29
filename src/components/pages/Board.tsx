@@ -1,3 +1,4 @@
+import { onValue, ref, set } from "firebase/database";
 import {
   Dispatch,
   FC,
@@ -9,8 +10,9 @@ import {
   useRef,
   useState,
 } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { ROOT_URL } from "../../App";
+import { db } from "../../firebase";
 import { checkWin, minimax } from "../helpers/minimax";
 import EndGameModal from "../modal/EndGameModal";
 import EndMatchModal from "../modal/EndMatchModal";
@@ -60,6 +62,12 @@ const Board: FC = () => {
 
   const { moves, currentPlayer, currentClass: playerClass } = currentRound;
   const { p1Name, p2Name, currentRound: roundNumber } = gameState;
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  const uuid = location.pathname.split(`${ROOT_URL}/join/`)[1];
+  const sessionRef = ref(db, uuid);
+  const roundRef = ref(db, `${uuid}_${gameState.currentRound}`);
 
   const playerType = localStorage.getItem("playerType");
 
@@ -72,8 +80,6 @@ const Board: FC = () => {
   const isVSComputer = gameState.matchType === "VSAI";
   const cellArrRef: RefObject<Array<HTMLDivElement>> = useRef([]);
   const boardRef: RefObject<HTMLDivElement> = useRef(null);
-
-  const navigate = useNavigate();
 
   const startRound = useCallback(() => {
     // setHoverClass(X_CLASS);
@@ -120,10 +126,13 @@ const Board: FC = () => {
       if (draw) {
         setResult("Draw!");
       } else {
-        // (dispatch as Dispatch<GameAction>)({
-        //   type: "SET_ADD_WIN",
-        // });
-        // setResult(`${gameMatch[currentPlayer].name} Wins!`);
+        const isP1 = currentPlayer === "p1";
+        set(sessionRef, {
+          ...gameState,
+          p1Score: isP1 ? gameState.p1Score + 1 : gameState.p1Score,
+          p2Score: !isP1 ? gameState.p2Score + 1 : gameState.p2Score,
+        });
+        setResult(`${currentPlayer === "p1" ? p1Name : p2Name} Wins!`);
       }
       // setIsEndMatchModalOpen(true);
     },
@@ -145,8 +154,13 @@ const Board: FC = () => {
         const currentClass = playerClass[currentPlayer];
         const currentBoard = {
           ...(moves[moves.length - 1] ?? []),
-          [i]: currentClass,
+          [i]: { class: currentClass, player: currentPlayer, timeLeft: 0 },
         };
+
+        set(roundRef, {
+          ...currentRound,
+          moves: currentBoard,
+        });
 
         if (checkWin(currentPlayer, currentBoard, playerClass)) {
           showResult(false);
@@ -158,10 +172,11 @@ const Board: FC = () => {
             setShowShuffle(true);
             return;
           }
-          // (dispatch as Dispatch<GameAction>)({
-          //   type: "SET_CURRENT_PLAYER",
-          //   payload: currentPlayer === "p1" ? "p2" : "p1",
-          // });
+
+          set(roundRef, {
+            ...currentRound,
+            currentPlayer: currentRound.currentPlayer === "p1" ? "p2" : "p1",
+          });
         }
       } catch (err) {
         console.log(err);
@@ -185,27 +200,28 @@ const Board: FC = () => {
   const handleAcceptShuffle = useCallback(
     (shuffledClass: string, shuffledPlayer: string) => {
       setShowShuffle(false);
-      // setPlayerClass({
-      //   [shuffledPlayer]: shuffledClass,
-      //   [shuffledPlayer === "p1" ? "p2" : "p1"]:
-      //     shuffledClass === X_CLASS ? CIRCLE_CLASS : X_CLASS,
-      // });
 
-      // (dispatch as Dispatch<GameAction>)({
-      //   type: "SET_CURRENT_PLAYER",
-      //   payload: shuffledPlayer as Player,
-      // });
-
-      // setHoverClass(shuffledClass);
+      set(roundRef, {
+        ...currentRound,
+        shuffleHistory: [
+          ...(currentRound.shuffleHistory ?? []),
+          {
+            class: shuffledClass,
+            player: shuffledPlayer,
+          },
+        ],
+        currentPlayer: shuffledPlayer,
+        currentClass: {
+          [shuffledPlayer]: shuffledClass,
+          [shuffledPlayer === "p1" ? "p2" : "p1"]:
+            shuffledClass === X_CLASS ? CIRCLE_CLASS : X_CLASS,
+        },
+      });
     },
-    []
+    [roundRef, set]
   );
 
   const handleContinue = useCallback(() => {}, []);
-
-  useEffect(() => {
-    // setHoverClass(playerClass[currentPlayer]);
-  }, [currentPlayer, playerClass]);
 
   useEffect(() => {
     if (isVSComputer && currentPlayer === "p2" && !showShuffle) {
@@ -217,7 +233,23 @@ const Board: FC = () => {
     startRound();
   }, [startRound]);
 
-  useEffect(() => {}, []);
+  useEffect(() => {
+    onValue(sessionRef, (snap) => {
+      const data = snap.val();
+      if (data) {
+        setGameState(data);
+      }
+    });
+  }, [sessionRef, onValue]);
+
+  useEffect(() => {
+    onValue(roundRef, (snap) => {
+      const data = snap.val();
+      if (data) {
+        setCurrentRound(data);
+      }
+    });
+  }, [roundRef, onValue]);
 
   return (
     <StyledBoard
@@ -243,8 +275,9 @@ const Board: FC = () => {
       {
         Array.from(Array(9)).map((_, i) => (
           <StyledCell
-            className={`${(moves[moves.length - 1] ?? [])[i].class ?? ""} ${
-              (!p1Name || !p2Name) && "disabled"
+            className={`${(moves[moves.length - 1] ?? [])[i]?.class ?? ""} ${
+              (!p1Name || (gameState.matchType === "PVP" && !p2Name)) &&
+              "disabled"
             }`}
             ref={createCellRefs(cellArrRef, i)}
             key={`${i}`}

@@ -84,21 +84,28 @@ const Game: FC = () => {
         <Banner>
           <PlayerContainer>
             <TextDisplay>{gameState.p1Name}</TextDisplay>
-            <TextDisplay>Score: {gameState.p1Score}</TextDisplay>
+            <TextDisplay>Score: {gameState.p1Score ?? 0}</TextDisplay>
           </PlayerContainer>
 
-          <PlayerContainer style={{ textAlign: "center" }}>
-            <TextDisplay>{gameState.p2Name}'s Turn</TextDisplay>
-          </PlayerContainer>
+          {/* <PlayerContainer style={{ textAlign: "center" }}>
+            <TextDisplay>{gameState.currentPlayer}'s Turn</TextDisplay>
+          </PlayerContainer> */}
 
           <PlayerContainer style={{ textAlign: "right" }}>
-            {!!gameState.p2Name ? (
-              <>
-                <TextDisplay>{gameState.p2Name}</TextDisplay>
-                <TextDisplay>Score: {gameState.p2Score}</TextDisplay>
-              </>
+            {gameState.matchType === "PVP" ? (
+              !!gameState.p2Name ? (
+                <>
+                  <TextDisplay>{gameState.p2Name}</TextDisplay>
+                  <TextDisplay>Score: {gameState.p2Score ?? 0}</TextDisplay>
+                </>
+              ) : (
+                <Button onClick={handleInviteClick}>Invite Opponent</Button>
+              )
             ) : (
-              <Button onClick={handleInviteClick}>Invite Opponent</Button>
+              <>
+                <TextDisplay>COMPUTER</TextDisplay>
+                <TextDisplay>Score: {gameState.p2Score ?? 0}</TextDisplay>
+              </>
             )}
           </PlayerContainer>
         </Banner>

@@ -82,13 +82,15 @@ const StartGameModal: FC<Props> = ({ isOpen, onClose, isTwoPlayer }) => {
         isGameEnded: false,
       });
 
+      localStorage.setItem("playerType", "p1");
+
       navigate(`${ROOT_URL}/${uuid}`);
     } catch (err) {
       console.log(err);
     } finally {
       onClose();
     }
-  }, [onClose, isTwoPlayer]);
+  }, [onClose, isTwoPlayer, localStorage]);
 
   return (
     <Modal isOpen={isOpen} onClose={handleCloseModal}>
