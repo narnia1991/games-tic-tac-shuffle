@@ -15,10 +15,10 @@ import { checkWin, minimax } from "../helpers/minimax";
 import EndGameModal from "../modal/EndGameModal";
 import EndMatchModal from "../modal/EndMatchModal";
 import ShuffleClass from "../modal/ShuffleClass";
-import { useGame } from "../provider/GameProvider";
 import { StyledBoard } from "../styled/StyledBoard";
 import { StyledCell } from "../styled/StyledCell";
 import { GameAction, GameState, Player } from "../types/types";
+import { DEFAULT_GAME_STATE } from "./Game";
 
 export const X_CLASS = "cross";
 export const CIRCLE_CLASS = "circle";
@@ -27,35 +27,61 @@ const defaultPlayerClass = {
   p2: CIRCLE_CLASS,
 };
 
-const Board: FC = () => {
-  const [state, dispatch] = useGame();
-  const { currentPlayer, gameMatch } = state as GameState;
-  const { p1, p2 } = gameMatch;
+type Move = {
+  postition: number;
+  player: string;
+  class: string;
+  timeLeft: string;
+};
 
-  const [playerClass, setPlayerClass] =
-    useState<Record<string, string>>(defaultPlayerClass);
-  const [moves, setMoves] = useState<Record<string, string>[]>([]);
-  const [hoverClass, setHoverClass] = useState(X_CLASS);
+export type RoundType = {
+  moves: Record<string, Move>[];
+  shuffleHistory: Array<{
+    player: string;
+    class: string;
+  }>;
+  currentPlayer: Player;
+  currentClass: Record<string, string>;
+};
+
+const DEFAULT_CURRENT_ROUND = {
+  moves: [],
+  shuffleHistory: [],
+  currentPlayer: "p1" as Player,
+  currentClass: defaultPlayerClass,
+};
+
+const Board: FC = () => {
+  const [gameState, setGameState] =
+    useState<typeof DEFAULT_GAME_STATE>(DEFAULT_GAME_STATE);
+  const [currentRound, setCurrentRound] = useState<RoundType>(
+    DEFAULT_CURRENT_ROUND
+  );
+
+  const { moves, currentPlayer, currentClass: playerClass } = currentRound;
+  const { p1Name, p2Name, currentRound: roundNumber } = gameState;
+
+  const playerType = localStorage.getItem("playerType");
+
+  const [result, setResult] = useState("");
+
   const [showShuffle, setShowShuffle] = useState(false);
   const [isEndMatchModalOpen, setIsEndMatchModalOpen] = useState(false);
   const [isEndGameModalOpen, setIsEndGameModalOpen] = useState(false);
-  const [result, setResult] = useState("");
 
-  const isVSComputer = !window.location.pathname.split("_")[1];
+  const isVSComputer = gameState.matchType === "VSAI";
   const cellArrRef: RefObject<Array<HTMLDivElement>> = useRef([]);
   const boardRef: RefObject<HTMLDivElement> = useRef(null);
 
   const navigate = useNavigate();
 
-  const startGame = useCallback(() => {
-    (dispatch as Dispatch<GameAction>)({ type: "RESET_MATCH" });
-    setHoverClass(X_CLASS);
-    setPlayerClass(defaultPlayerClass);
-    setMoves([]);
-  }, [dispatch]);
+  const startRound = useCallback(() => {
+    // setHoverClass(X_CLASS);
+    // setPlayerClass(defaultPlayerClass);
+  }, []);
 
   const handleModalClose = () => {
-    startGame();
+    startRound();
     setIsEndMatchModalOpen(false);
   };
 
@@ -64,13 +90,13 @@ const Board: FC = () => {
   }, []);
 
   const handleEndGameModalClose = useCallback(() => {
-    (dispatch as Dispatch<GameAction>)({ type: "RESET_GAME" });
+    // (dispatch as Dispatch<GameAction>)({ type: "RESET_GAME" });
     // getNames(location, dispatch as Dispatch<GameAction>);
     setIsEndGameModalOpen(false);
-    startGame();
+    startRound();
 
     navigate(ROOT_URL);
-  }, [dispatch, startGame, navigate]);
+  }, [startRound, navigate]);
 
   const createCellRefs = useCallback(
     (cellArr: RefObject<Array<HTMLDivElement>>, index: number) =>
@@ -94,20 +120,25 @@ const Board: FC = () => {
       if (draw) {
         setResult("Draw!");
       } else {
-        (dispatch as Dispatch<GameAction>)({
-          type: "SET_ADD_WIN",
-        });
-        setResult(`${gameMatch[currentPlayer].name} Wins!`);
+        // (dispatch as Dispatch<GameAction>)({
+        //   type: "SET_ADD_WIN",
+        // });
+        // setResult(`${gameMatch[currentPlayer].name} Wins!`);
       }
-      setIsEndMatchModalOpen(true);
+      // setIsEndMatchModalOpen(true);
     },
-    [currentPlayer, dispatch, gameMatch]
+    [currentPlayer]
   );
 
   const handleCellClick = useCallback(
     (i: number) => () => {
       try {
-        if (!!moves.length && (moves[moves.length - 1] ?? [])[i]) {
+        if (
+          (!!moves.length && (moves[moves.length - 1] ?? [])[i]) ||
+          !p1Name ||
+          !p2Name ||
+          currentPlayer !== playerType
+        ) {
           return;
         }
 
@@ -116,12 +147,6 @@ const Board: FC = () => {
           ...(moves[moves.length - 1] ?? []),
           [i]: currentClass,
         };
-
-        setMoves([...moves, currentBoard]);
-
-        const pause = setTimeout(() => {
-          clearTimeout(pause);
-        }, 100);
 
         if (checkWin(currentPlayer, currentBoard, playerClass)) {
           showResult(false);
@@ -133,24 +158,16 @@ const Board: FC = () => {
             setShowShuffle(true);
             return;
           }
-          (dispatch as Dispatch<GameAction>)({
-            type: "SET_CURRENT_PLAYER",
-            payload: currentPlayer === "p1" ? "p2" : "p1",
-          });
+          // (dispatch as Dispatch<GameAction>)({
+          //   type: "SET_CURRENT_PLAYER",
+          //   payload: currentPlayer === "p1" ? "p2" : "p1",
+          // });
         }
       } catch (err) {
         console.log(err);
       }
     },
-    [
-      isDraw,
-      playerClass,
-      currentPlayer,
-      dispatch,
-      isVSComputer,
-      showResult,
-      moves,
-    ]
+    [isDraw, playerClass, currentPlayer, isVSComputer, showResult, moves]
   );
 
   const bestSpot = useCallback(() => {
@@ -163,29 +180,31 @@ const Board: FC = () => {
 
       handleCellClick(index as number)();
     }
-  }, [isEndGameModalOpen, isEndMatchModalOpen, moves, playerClass, dispatch]);
+  }, [isEndGameModalOpen, isEndMatchModalOpen, moves, playerClass]);
 
   const handleAcceptShuffle = useCallback(
     (shuffledClass: string, shuffledPlayer: string) => {
       setShowShuffle(false);
-      setPlayerClass({
-        [shuffledPlayer]: shuffledClass,
-        [shuffledPlayer === "p1" ? "p2" : "p1"]:
-          shuffledClass === X_CLASS ? CIRCLE_CLASS : X_CLASS,
-      });
+      // setPlayerClass({
+      //   [shuffledPlayer]: shuffledClass,
+      //   [shuffledPlayer === "p1" ? "p2" : "p1"]:
+      //     shuffledClass === X_CLASS ? CIRCLE_CLASS : X_CLASS,
+      // });
 
-      (dispatch as Dispatch<GameAction>)({
-        type: "SET_CURRENT_PLAYER",
-        payload: shuffledPlayer as Player,
-      });
+      // (dispatch as Dispatch<GameAction>)({
+      //   type: "SET_CURRENT_PLAYER",
+      //   payload: shuffledPlayer as Player,
+      // });
 
-      setHoverClass(shuffledClass);
+      // setHoverClass(shuffledClass);
     },
-    [dispatch]
+    []
   );
 
+  const handleContinue = useCallback(() => {}, []);
+
   useEffect(() => {
-    setHoverClass(playerClass[currentPlayer]);
+    // setHoverClass(playerClass[currentPlayer]);
   }, [currentPlayer, playerClass]);
 
   useEffect(() => {
@@ -195,13 +214,19 @@ const Board: FC = () => {
   }, [bestSpot, isVSComputer, currentPlayer]);
 
   useEffect(() => {
-    startGame();
-  }, [startGame]);
+    startRound();
+  }, [startRound]);
+
+  useEffect(() => {}, []);
 
   return (
-    <StyledBoard className={`board ${hoverClass} `} ref={boardRef}>
+    <StyledBoard
+      className={`board ${
+        playerClass.p1 === X_CLASS ? X_CLASS : CIRCLE_CLASS
+      } `}
+      ref={boardRef}
+    >
       <EndMatchModal
-        gameMatch={gameMatch}
         header={result}
         isOpen={isEndMatchModalOpen}
         onClose={handleModalClose}
@@ -209,15 +234,17 @@ const Board: FC = () => {
       />
 
       <EndGameModal
-        gameMatch={gameMatch}
+        gameState={gameState}
         isOpen={isEndGameModalOpen}
         onClose={handleEndGameModalClose}
+        onContinue={handleContinue}
       />
+
       {
         Array.from(Array(9)).map((_, i) => (
           <StyledCell
-            className={`${(moves[moves.length - 1] ?? [])[i] ?? ""} ${
-              (!p2.name || !p1.name) && "disabled"
+            className={`${(moves[moves.length - 1] ?? [])[i].class ?? ""} ${
+              (!p1Name || !p2Name) && "disabled"
             }`}
             ref={createCellRefs(cellArrRef, i)}
             key={`${i}`}

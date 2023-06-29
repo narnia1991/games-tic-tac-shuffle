@@ -1,10 +1,8 @@
 import Game from "./components/pages/Game";
 import Landing from "./components/pages/Landing";
-import GameProvider from "./components/provider/GameProvider";
 import { Routes, Route } from "react-router-dom";
 import { FC, useEffect } from "react";
 import { v4 as uuidv4 } from "uuid";
-import JoinGameModal from "./components/modal/JoinGameModal";
 
 export const ROOT_URL = "/games-tic-tac-shuffle";
 
@@ -22,22 +20,8 @@ const App: FC = () => {
     <div className="App">
       <Routes>
         <Route path={ROOT_URL} element={<Landing />}></Route>
-        <Route
-          path={`${ROOT_URL}/:gameId`}
-          element={
-            <GameProvider>
-              <Game />
-            </GameProvider>
-          }
-        ></Route>
-        <Route
-          path={`${ROOT_URL}/join/:gameId`}
-          element={
-            <GameProvider>
-              <Game />
-            </GameProvider>
-          }
-        ></Route>
+        <Route path={`${ROOT_URL}/:gameId`} element={<Game />}></Route>
+        <Route path={`${ROOT_URL}/join/:gameId`} element={<Game />}></Route>
       </Routes>
     </div>
   );

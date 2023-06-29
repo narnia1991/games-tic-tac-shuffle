@@ -7,8 +7,6 @@ import {
   TextDisplay,
   Wrapper,
 } from "../styled/StyledGame";
-import { useGame } from "../provider/GameProvider";
-import { GameAction, GameState } from "../types/types";
 import { ROOT_URL } from "../../App";
 import { useLocation, useNavigate } from "react-router-dom";
 import { onValue, ref } from "firebase/database";
@@ -17,24 +15,28 @@ import JoinGameModal from "../modal/JoinGameModal";
 import InviteModal from "../modal/InviteModal";
 import Button from "../common/Button";
 
-/*
-  TODO:
-  Game Board
-  Score Indicator
-  Turn Indicator
-  End Game Button
-  End Game Confirmation Modal
-  Match Results Modal
-*/
+export const DEFAULT_GAME_STATE = {
+  isGameEnded: false,
+  matchType: "PVP",
+  p1Id: undefined,
+  p1Name: undefined,
+  p2Id: undefined,
+  p2Name: undefined,
+  rCount: 1,
+  currentRound: 1,
+  p1Score: 0,
+  p2Score: 0,
+  p1Ready: false,
+  p2Ready: false,
+};
 
 const Game: FC = () => {
   const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
   const userId = localStorage.getItem("userId");
   const location = useLocation();
   const navigate = useNavigate();
-  const [state, dispatch] = useGame();
-  const { gameMatch, currentPlayer } = state as GameState;
-  const { p1, p2 } = gameMatch;
+  const [gameState, setGameState] =
+    useState<typeof DEFAULT_GAME_STATE>(DEFAULT_GAME_STATE);
 
   const isJoining = location.pathname.split("/").includes("join");
 
@@ -68,25 +70,11 @@ const Game: FC = () => {
             navigate(-1);
           }
 
-          let p2Name;
-
-          if (data.matchType === "VSAI") {
-            p2Name = "Computer";
-          } else if (data.p2Name) {
-            p2Name = data.p2Name;
-          }
-
-          (dispatch as Dispatch<GameAction>)({
-            type: "SET_PLAYER_NAMES",
-            payload: {
-              p1: data.p1Name,
-              p2: p2Name,
-            },
-          });
+          setGameState(data);
         }
       });
     }
-  }, [dispatch, location]);
+  }, [location]);
 
   return (
     <Container>
@@ -95,27 +83,27 @@ const Game: FC = () => {
         <InviteModal isOpen={isInviteModalOpen} onClose={onInviteModalClose} />
         <Banner>
           <PlayerContainer>
-            <TextDisplay>{p1.name}</TextDisplay>
-            <TextDisplay>Score: {p1.score}</TextDisplay>
+            <TextDisplay>{gameState.p1Name}</TextDisplay>
+            <TextDisplay>Score: {gameState.p1Score}</TextDisplay>
           </PlayerContainer>
 
           <PlayerContainer style={{ textAlign: "center" }}>
-            <TextDisplay>{gameMatch[currentPlayer].name}'s Turn</TextDisplay>
+            <TextDisplay>{gameState.p2Name}'s Turn</TextDisplay>
           </PlayerContainer>
 
           <PlayerContainer style={{ textAlign: "right" }}>
-            {!!p2.name ? (
-              <TextDisplay>
-                {!!p2.name ? p2.name : "Waiting for Opponent..."}
-              </TextDisplay>
+            {!!gameState.p2Name ? (
+              <>
+                <TextDisplay>{gameState.p2Name}</TextDisplay>
+                <TextDisplay>Score: {gameState.p2Score}</TextDisplay>
+              </>
             ) : (
               <Button onClick={handleInviteClick}>Invite Opponent</Button>
             )}
-            <TextDisplay>Score: {p2.score}</TextDisplay>
           </PlayerContainer>
         </Banner>
 
-        {p1.name && <Board />}
+        {gameState.p1Name && <Board />}
       </Wrapper>
     </Container>
   );
