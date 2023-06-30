@@ -15,6 +15,21 @@ import JoinGameModal from "../modal/JoinGameModal";
 import InviteModal from "../modal/InviteModal";
 import Button from "../common/Button";
 
+export type GameStateProps = {
+  isGameEnded: boolean;
+  matchType: string;
+  p1Id?: string;
+  p1Name?: string;
+  p2Id?: string;
+  p2Name?: string;
+  rCount: number;
+  currentRound: number;
+  p1Score: number;
+  p2Score: number;
+  p1Ready: boolean;
+  p2Ready: boolean;
+};
+
 export const DEFAULT_GAME_STATE = {
   isGameEnded: false,
   matchType: "PVP",

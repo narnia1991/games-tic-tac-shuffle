@@ -77,9 +77,13 @@ const StartGameModal: FC<Props> = ({ isOpen, onClose, isTwoPlayer }) => {
         p1Id: userId,
         p1Name,
         rCount,
-        r1Moves: [],
         matchType: isTwoPlayer ? "PVP" : "VSAI",
         isGameEnded: false,
+        currentRound: 1,
+        p1Score: 0,
+        p2Score: 0,
+        p1Ready: true,
+        p2Ready: !isTwoPlayer,
       });
 
       localStorage.setItem("playerType", "p1");

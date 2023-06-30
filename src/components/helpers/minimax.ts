@@ -10,14 +10,14 @@ export const emptySquares = (currentBoard: Record<string, string>) =>
 
 export const checkWin = (
   player: Player,
-  currentBoard: Record<string, string>,
+  currentBoard: Record<string, Record<string, string | number>>,
   playerClass: Record<string, string>
 ) => {
   if (!!currentBoard) {
     if (Object.keys(currentBoard).length >= 3) {
       return winningCombinations.some((combination) => {
         return combination.every((index) => {
-          return currentBoard[index] === playerClass[player];
+          return currentBoard[index]?.class === playerClass[player];
         });
       });
     }

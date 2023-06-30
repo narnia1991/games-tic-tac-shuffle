@@ -1,6 +1,5 @@
 import { onValue, ref, set } from "firebase/database";
 import {
-  Dispatch,
   FC,
   ReactNode,
   RefObject,
@@ -19,7 +18,7 @@ import EndMatchModal from "../modal/EndMatchModal";
 import ShuffleClass from "../modal/ShuffleClass";
 import { StyledBoard } from "../styled/StyledBoard";
 import { StyledCell } from "../styled/StyledCell";
-import { GameAction, GameState, Player } from "../types/types";
+import { Player } from "../types/types";
 import { DEFAULT_GAME_STATE } from "./Game";
 
 export const X_CLASS = "cross";
@@ -60,14 +59,22 @@ const Board: FC = () => {
     DEFAULT_CURRENT_ROUND
   );
 
-  const { moves, currentPlayer, currentClass: playerClass } = currentRound;
-  const { p1Name, p2Name, currentRound: roundNumber } = gameState;
+  const { moves = [], currentPlayer, currentClass: playerClass } = currentRound;
+  const {
+    p1Name,
+    p2Name,
+    currentRound: roundNumber,
+    matchType,
+    p1Score,
+    p2Score,
+  } = gameState;
+
   const location = useLocation();
   const navigate = useNavigate();
 
-  const uuid = location.pathname.split(`${ROOT_URL}/join/`)[1];
+  const uuid = location.pathname.split(`${ROOT_URL}/`)[1];
   const sessionRef = ref(db, uuid);
-  const roundRef = ref(db, `${uuid}_${gameState.currentRound}`);
+  const roundRef = ref(db, `${uuid}_${roundNumber}`);
 
   const playerType = localStorage.getItem("playerType");
 
@@ -77,7 +84,7 @@ const Board: FC = () => {
   const [isEndMatchModalOpen, setIsEndMatchModalOpen] = useState(false);
   const [isEndGameModalOpen, setIsEndGameModalOpen] = useState(false);
 
-  const isVSComputer = gameState.matchType === "VSAI";
+  const isVSComputer = matchType === "VSAI";
   const cellArrRef: RefObject<Array<HTMLDivElement>> = useRef([]);
   const boardRef: RefObject<HTMLDivElement> = useRef(null);
 
@@ -125,18 +132,25 @@ const Board: FC = () => {
     (draw: boolean) => {
       if (draw) {
         setResult("Draw!");
+        set(sessionRef, {
+          ...gameState,
+          currentRound: roundNumber + 1,
+        });
       } else {
         const isP1 = currentPlayer === "p1";
         set(sessionRef, {
           ...gameState,
-          p1Score: isP1 ? gameState.p1Score + 1 : gameState.p1Score,
-          p2Score: !isP1 ? gameState.p2Score + 1 : gameState.p2Score,
+          p1Score: isP1 ? p1Score + 1 : p1Score,
+          p2Score: !isP1 ? p2Score + 1 : p2Score,
+          currentRound: roundNumber + 1,
         });
-        setResult(`${currentPlayer === "p1" ? p1Name : p2Name} Wins!`);
+        setResult(
+          `${currentPlayer === "p1" ? p1Name : p2Name ?? "COMPUTER"} Wins!`
+        );
       }
-      // setIsEndMatchModalOpen(true);
+      setIsEndMatchModalOpen(true);
     },
-    [currentPlayer]
+    [currentPlayer, p1Score, p2Score, gameState, roundNumber]
   );
 
   const handleCellClick = useCallback(
@@ -145,8 +159,7 @@ const Board: FC = () => {
         if (
           (!!moves.length && (moves[moves.length - 1] ?? [])[i]) ||
           !p1Name ||
-          !p2Name ||
-          currentPlayer !== playerType
+          (!isVSComputer && (!p2Name || currentPlayer !== playerType))
         ) {
           return;
         }
@@ -157,39 +170,46 @@ const Board: FC = () => {
           [i]: { class: currentClass, player: currentPlayer, timeLeft: 0 },
         };
 
-        set(roundRef, {
-          ...currentRound,
-          moves: currentBoard,
-        });
-
         if (checkWin(currentPlayer, currentBoard, playerClass)) {
           showResult(false);
         } else if (moves.length === 8) {
           showResult(true);
         } else {
           // swap turns
+          set(roundRef, {
+            ...currentRound,
+            currentPlayer: currentRound.currentPlayer === "p1" ? "p2" : "p1",
+            moves: [...currentRound.moves, currentBoard],
+          });
+
           if (!!(moves.length % 2)) {
             setShowShuffle(true);
             return;
           }
-
-          set(roundRef, {
-            ...currentRound,
-            currentPlayer: currentRound.currentPlayer === "p1" ? "p2" : "p1",
-          });
         }
       } catch (err) {
         console.log(err);
       }
     },
-    [isDraw, playerClass, currentPlayer, isVSComputer, showResult, moves]
+    [
+      isDraw,
+      playerClass,
+      currentPlayer,
+      isVSComputer,
+      showResult,
+      moves,
+      set,
+      currentRound,
+      matchType,
+      playerType,
+    ]
   );
 
   const bestSpot = useCallback(() => {
     if (!isEndGameModalOpen && !isEndMatchModalOpen) {
       const { index } = minimax({
         currentBoard: [...moves].pop(),
-        player: "p1",
+        player: "p2",
         playerClass,
       });
 
@@ -218,29 +238,20 @@ const Board: FC = () => {
         },
       });
     },
-    [roundRef, set]
+    [roundRef, set, currentRound]
   );
 
   const handleContinue = useCallback(() => {}, []);
 
   useEffect(() => {
-    if (isVSComputer && currentPlayer === "p2" && !showShuffle) {
+    if (!!isVSComputer && currentPlayer === "p2" && !showShuffle) {
       bestSpot();
     }
-  }, [bestSpot, isVSComputer, currentPlayer]);
+  }, [bestSpot, isVSComputer, currentPlayer, showShuffle]);
 
   useEffect(() => {
     startRound();
   }, [startRound]);
-
-  useEffect(() => {
-    onValue(sessionRef, (snap) => {
-      const data = snap.val();
-      if (data) {
-        setGameState(data);
-      }
-    });
-  }, [sessionRef, onValue]);
 
   useEffect(() => {
     onValue(roundRef, (snap) => {
@@ -249,7 +260,14 @@ const Board: FC = () => {
         setCurrentRound(data);
       }
     });
-  }, [roundRef, onValue]);
+
+    onValue(sessionRef, (snap) => {
+      const data = snap.val();
+      if (data) {
+        setGameState(data);
+      }
+    });
+  }, []);
 
   return (
     <StyledBoard
@@ -276,8 +294,7 @@ const Board: FC = () => {
         Array.from(Array(9)).map((_, i) => (
           <StyledCell
             className={`${(moves[moves.length - 1] ?? [])[i]?.class ?? ""} ${
-              (!p1Name || (gameState.matchType === "PVP" && !p2Name)) &&
-              "disabled"
+              (!p1Name || (!isVSComputer && !p2Name)) && "disabled"
             }`}
             ref={createCellRefs(cellArrRef, i)}
             key={`${i}`}
