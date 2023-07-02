@@ -1,5 +1,4 @@
 import { winningCombinations } from "../../schema";
-import { Player } from "../types/types";
 
 export const emptySquares = (currentBoard: Record<string, string>) =>
   !!currentBoard
@@ -9,7 +8,7 @@ export const emptySquares = (currentBoard: Record<string, string>) =>
     : Array.from(Array(9)).map((_, i) => i);
 
 export const checkWin = (
-  player: Player,
+  player: string,
   currentBoard: Record<string, Record<string, string | number>>,
   playerClass: Record<string, string>
 ) => {

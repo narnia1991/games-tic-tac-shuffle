@@ -12,17 +12,18 @@ import {
 import { useLocation, useNavigate } from "react-router-dom";
 import { ROOT_URL } from "../../App";
 import { db } from "../../firebase";
+import useGameController from "../controllers/useGameController";
+import useLocalGameState from "../controllers/useLocalGameState";
 import { checkWin, minimax } from "../helpers/minimax";
 import EndGameModal from "../modal/EndGameModal";
 import EndMatchModal from "../modal/EndMatchModal";
 import ShuffleClass from "../modal/ShuffleClass";
 import { StyledBoard } from "../styled/StyledBoard";
 import { StyledCell } from "../styled/StyledCell";
-import { Player } from "../types/types";
-import { DEFAULT_GAME_STATE } from "./Game";
 
 export const X_CLASS = "cross";
 export const CIRCLE_CLASS = "circle";
+
 const defaultPlayerClass = {
   p1: X_CLASS,
   p2: CIRCLE_CLASS,
@@ -41,20 +42,21 @@ export type RoundType = {
     player: string;
     class: string;
   }>;
-  currentPlayer: Player;
+  currentPlayer: string;
   currentClass: Record<string, string>;
 };
 
 const DEFAULT_CURRENT_ROUND = {
   moves: [],
   shuffleHistory: [],
-  currentPlayer: "p1" as Player,
+  currentPlayer: "p1",
   currentClass: defaultPlayerClass,
 };
 
 const Board: FC = () => {
-  const [gameState, setGameState] =
-    useState<typeof DEFAULT_GAME_STATE>(DEFAULT_GAME_STATE);
+  const { sessionId } = useLocalGameState();
+
+  const { gameState } = useGameController({ sessionId });
   const [currentRound, setCurrentRound] = useState<RoundType>(
     DEFAULT_CURRENT_ROUND
   );
@@ -258,13 +260,6 @@ const Board: FC = () => {
       const data = snap.val();
       if (data) {
         setCurrentRound(data);
-      }
-    });
-
-    onValue(sessionRef, (snap) => {
-      const data = snap.val();
-      if (data) {
-        setGameState(data);
       }
     });
   }, []);

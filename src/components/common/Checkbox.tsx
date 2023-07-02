@@ -72,7 +72,12 @@ const Checkbox: FC<Props> = ({
   return (
     <CContainer onClick={onClick}>
       {label}
-      <Radio name={name.toString()} type="radio" {...props}></Radio>
+      <Radio
+        name={name.toString()}
+        type="radio"
+        {...props}
+        defaultChecked={checked}
+      ></Radio>
       <InnerRadio className="checkmark"></InnerRadio>
     </CContainer>
   );
