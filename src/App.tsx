@@ -1,20 +1,23 @@
 import Game from "./components/pages/Game";
 import Landing from "./components/pages/Landing";
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, useLocation } from "react-router-dom";
 import { FC, useEffect } from "react";
 import { v4 as uuidv4 } from "uuid";
+import useLocalGameState from "./components/controllers/useLocalGameState";
 
 export const ROOT_URL = "/games-tic-tac-shuffle";
 
 const App: FC = () => {
-  useEffect(() => {
-    const user = localStorage.getItem("userId");
+  const location = useLocation();
+  const { resetState, setUserId } = useLocalGameState();
 
-    if (!user) {
-      const userId = uuidv4();
-      localStorage.setItem("userId", userId);
+  useEffect(() => {
+    if (location.pathname.split("/").length === 2) {
+      resetState();
+      const tempUserId = uuidv4();
+      setUserId(tempUserId);
     }
-  }, []);
+  }, [location]);
 
   return (
     <div className="App">

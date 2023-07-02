@@ -10,6 +10,8 @@ import { fallBackFont, textPrimary } from "../../variables";
 import Button from "../common/Button";
 import Input from "../common/Input";
 import Modal from "../common/Modal";
+import useGameController, { MatchType } from "../controllers/useGameController";
+import useLocalGameState from "../controllers/useLocalGameState";
 
 const Container = styled.div`
   display: flex;
@@ -46,7 +48,10 @@ type Props = {
 };
 
 const StartGameModal: FC<Props> = ({ isOpen, onClose, isTwoPlayer }) => {
-  const userId = localStorage.getItem("userId");
+  const { userId, setPlayerType, sessionId, setSessionId } =
+    useLocalGameState();
+
+  const { saveGameState } = useGameController({ sessionId, userId });
 
   const handleCloseModal = useCallback(() => {
     onClose();
@@ -62,24 +67,28 @@ const StartGameModal: FC<Props> = ({ isOpen, onClose, isTwoPlayer }) => {
     const roundCount = roundCountRef.current;
 
     const uuid = uuidv4();
+    setPlayerType("p1");
+    setSessionId(uuid);
 
     if (!player1) {
       return;
     }
 
     const p1Name = player1.value;
-    const rCount = roundCount?.value ?? 1;
+    const rCount = Number(roundCount?.value) ?? 1;
 
     try {
-      const sessionRef = ref(db, uuid);
-
-      set(sessionRef, {
+      saveGameState({
         p1Id: userId,
         p1Name,
         rCount,
-        r1Moves: [],
-        matchType: isTwoPlayer ? "PVP" : "VSAI",
+        matchType: isTwoPlayer ? MatchType.PVP : MatchType.VSAI,
         isGameEnded: false,
+        currentRound: 1,
+        p1Score: 0,
+        p2Score: 0,
+        p1Ready: true,
+        p2Ready: !isTwoPlayer,
       });
 
       navigate(`${ROOT_URL}/${uuid}`);
@@ -88,7 +97,7 @@ const StartGameModal: FC<Props> = ({ isOpen, onClose, isTwoPlayer }) => {
     } finally {
       onClose();
     }
-  }, [onClose, isTwoPlayer]);
+  }, [onClose, isTwoPlayer, setPlayerType, setSessionId]);
 
   return (
     <Modal isOpen={isOpen} onClose={handleCloseModal}>

@@ -5,9 +5,8 @@ import Checkbox from "../common/Checkbox";
 import Button from "../common/Button";
 import StartGameModal from "../modal/StartGameModal";
 import { Container } from "../styled/Container";
-import { db } from "../../firebase";
-import { ref, onValue } from "firebase/database";
 import JoinInviteModal from "../modal/JoinInviteModal";
+import useGameListController from "../controllers/useGameListController";
 
 const StartContainer = styled(Container)`
   height: auto;
@@ -59,20 +58,9 @@ const EmptyDiv = styled.div`
 
 const Landing: FC = () => {
   const [mode, setMode] = useState("");
-  const [gameList, setGameList] = useState<any>([]);
   const [isStartModalOpen, setIsStartModalOpen] = useState(false);
   const [isJoinInviteModalOpen, setIsJoinInviteModalOpen] = useState(false);
-
-  const loadGames = () => {
-    const sessionRef = ref(db, "/sessions");
-
-    onValue(sessionRef, (snap) => {
-      const data = snap.val();
-      if (data?.length) {
-        setGameList(data ?? []);
-      }
-    });
-  };
+  const gameList = useGameListController();
 
   const handleJoinInvite = useCallback(() => {
     setIsJoinInviteModalOpen(true);
@@ -85,6 +73,7 @@ const Landing: FC = () => {
   const handleStartClick = useCallback(
     (e: MouseEvent) => {
       e.preventDefault();
+
       setIsStartModalOpen(true);
     },
     [mode]
@@ -103,16 +92,17 @@ const Landing: FC = () => {
 
   useEffect(() => {
     setMode("VSAI");
-    loadGames();
   }, []);
 
   return (
     <Container>
-      <StartGameModal
-        isOpen={isStartModalOpen}
-        onClose={closeStartModal}
-        isTwoPlayer={mode === "PVP"}
-      />
+      {!!isStartModalOpen && (
+        <StartGameModal
+          isOpen={isStartModalOpen}
+          onClose={closeStartModal}
+          isTwoPlayer={mode === "PVP"}
+        />
+      )}
       <JoinInviteModal
         isOpen={isJoinInviteModalOpen}
         onClose={handleCloseJoinInviteModal}

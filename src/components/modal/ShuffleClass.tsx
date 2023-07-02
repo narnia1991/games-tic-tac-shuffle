@@ -6,7 +6,6 @@ import { FC, useCallback, useEffect, useState } from "react";
 
 import Modal from "../common/Modal";
 import { CIRCLE_CLASS, X_CLASS } from "../pages/Board";
-import { Player } from "../types/types";
 import { ROOT_URL } from "../../App";
 import { useLocation } from "react-router-dom";
 
@@ -96,7 +95,7 @@ const ShuffleTitle = styled.span`
 
 type Props = {
   isOpen: boolean;
-  onClose(currentClass: string, currentPlayer: Player): void;
+  onClose(currentClass: string, currentPlayer: string): void;
 };
 
 const ShuffleClass: FC<Props> = ({ isOpen, onClose }) => {
@@ -112,7 +111,7 @@ const ShuffleClass: FC<Props> = ({ isOpen, onClose }) => {
   );
 
   const handleClose = useCallback(() => {
-    onClose?.(ticTacClass, ticTacPlayer as Player);
+    onClose?.(ticTacClass, ticTacPlayer);
   }, [onClose, ticTacClass, ticTacPlayer]);
 
   useEffect(() => {

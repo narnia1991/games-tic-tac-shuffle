@@ -50,6 +50,7 @@ const JoinGameModal: FC<Props> = ({ isOpen, onClose }) => {
   const navigate = useNavigate();
   const uuid = location.pathname.split(`${ROOT_URL}/join/`)[1];
   const sessionRef = ref(db, uuid);
+  const [isGameInvalid, setIsGameInvalid] = useState(false);
 
   const handleCloseModal = useCallback(() => {
     navigate(`${ROOT_URL}`, { replace: true });
@@ -73,16 +74,24 @@ const JoinGameModal: FC<Props> = ({ isOpen, onClose }) => {
         p2Name,
       });
 
+      localStorage.setItem("playerType", "p2");
+
+      onClose?.();
+
       navigate(`${ROOT_URL}/${uuid}`, { replace: true });
     } catch (err) {
       console.log(err);
     }
-  }, [set, navigate, matchDetails]);
+  }, [set, navigate, matchDetails, localStorage]);
 
   useEffect(() => {
     onValue(sessionRef, (snap) => {
       const data = snap.val();
       if (data) {
+        if (data.matchType === "VSAI") {
+          setIsGameInvalid(true);
+          return;
+        }
         setMatchDetails(data);
       }
     });
@@ -93,9 +102,11 @@ const JoinGameModal: FC<Props> = ({ isOpen, onClose }) => {
       {!matchDetails.p1Id && <Label>Game Not Found</Label>}
       {!!matchDetails.p1Id && (
         <PlayerContainer>
+          <Label>Game With: {matchDetails.p1Name}</Label>
+          <br />
+          <Label>No. of Matches: {matchDetails.rCount}</Label>
+          <br />
           <InputContainer>
-            <Label>Game With: {matchDetails.p1Name}</Label>
-            <Label>No. of Matches: {matchDetails.rCount}</Label>
             <Label>Nickname:</Label>
             <Input name="player2" forwardRef={p2Ref}></Input>
           </InputContainer>
@@ -105,7 +116,7 @@ const JoinGameModal: FC<Props> = ({ isOpen, onClose }) => {
         <Button variant="text" onClick={handleCloseModal}>
           Cancel
         </Button>
-        {!!matchDetails.p1Id && (
+        {!!matchDetails.p1Id && !isGameInvalid && (
           <Button variant="text" onClick={handleJoinGame}>
             Join
           </Button>

@@ -4,7 +4,6 @@ import { FC, useEffect, useState } from "react";
 import { fallBackFont, textPrimary } from "../../variables";
 import Button from "../common/Button";
 import Modal from "../common/Modal";
-import { PlayerScore } from "../types/types";
 
 const Container = styled.div`
   display: flex;
